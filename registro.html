@@ -29,7 +29,7 @@
           >
           <div class="rounded-md border border-[#8aa598] p-1 text-xs font-semibold" aria-label="Selector de idioma">
             <span class="rounded bg-[#11303f] px-2 py-1 text-[#e1e2de]">ES</span>
-            <a class="rounded px-2 py-1 text-[#456b79] hover:bg-[#bcc4ad]" href="registro.en.html" hreflang="en" lang="en">EN</a>
+            <a class="rounded px-2 py-1 text-[#2f4f5f] hover:bg-[#bcc4ad]" href="registro.en.html" hreflang="en" lang="en">EN</a>
           </div>
         </div>
       </div>
@@ -38,7 +38,7 @@
     <main id="contenido-principal" class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
       <section aria-labelledby="registro-title" class="rounded-2xl border border-[#8aa598] bg-[#e1e2de] p-6 shadow-sm sm:p-8">
         <h1 id="registro-title" class="text-3xl font-bold tracking-tight">Formulario de registro de talento</h1>
-        <p class="mt-3 text-sm text-[#456b79]">
+        <p class="mt-3 text-sm text-[#2f4f5f]">
           Este formulario está dirigido a profesionales en búsqueda activa o pasiva de oportunidades laborales.
         </p>
         <p class="mt-2 rounded-md border border-[#8aa598] bg-[#bcc4ad] px-4 py-3 text-sm text-[#11303f]" role="note">
@@ -224,7 +224,7 @@
               aria-describedby="comments-counter error-comments"
               class="mt-1 w-full rounded-md border border-[#8aa598] bg-[#e1e2de] px-3 py-2 text-sm shadow-sm focus:border-[#456b79] focus:outline-none focus:ring-2 focus:ring-[#bcc4ad]"
             ></textarea>
-            <p id="comments-counter" class="mt-1 text-xs text-[#456b79]">500 caracteres restantes</p>
+            <p id="comments-counter" class="mt-1 text-xs text-[#2f4f5f]">500 caracteres restantes</p>
             <p id="error-comments" class="mt-1 hidden text-sm text-red-700"></p>
           </div>
 
@@ -243,12 +243,20 @@
             <p id="error-terms" class="mt-1 hidden text-sm text-red-700"></p>
           </div>
 
-          <button
-            type="submit"
-            class="w-full rounded-md bg-[#11303f] px-5 py-3 text-sm font-semibold text-[#e1e2de] hover:bg-[#456b79] focus:outline-none focus:ring-2 focus:ring-[#8aa598]"
-          >
-            Enviar registro
-          </button>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <button
+              type="submit"
+              class="w-full rounded-md bg-[#11303f] px-5 py-3 text-sm font-semibold text-[#e1e2de] hover:bg-[#456b79] focus:outline-none focus:ring-2 focus:ring-[#8aa598]"
+            >
+              Enviar registro
+            </button>
+            <button
+              type="reset"
+              class="w-full rounded-md border border-[#8aa598] bg-[#e1e2de] px-5 py-3 text-sm font-semibold text-[#11303f] hover:bg-[#bcc4ad] focus:outline-none focus:ring-2 focus:ring-[#8aa598]"
+            >
+              Limpiar formulario
+            </button>
+          </div>
         </form>
       </section>
     </main>
@@ -259,6 +267,6 @@
       </div>
     </footer>
 
-    <script src="app.js" defer></script>
+    <script src="validation.js" defer></script>
   </body>
 </html>

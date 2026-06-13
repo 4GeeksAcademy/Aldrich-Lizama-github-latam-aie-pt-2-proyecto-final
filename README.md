@@ -62,6 +62,16 @@ ai-engineering-company-project-monorepo/
 4. **Review** each top-level folder `README.md` to understand intended responsibilities (`uis/`, `services/`, `data/`, `skills/`, etc.).
 5. **Start implementing** milestone deliverables in `uis/` and `services/`, reusing `packages/shared/` and `data/` as needed.
 
+### Run locally in Codespaces (npx)
+
+To serve the static project locally in Codespaces, run:
+
+```bash
+npx --yes serve -s . -l 4173
+```
+
+Then open: `http://localhost:4173`
+
 ---
 
 ## Milestones (reference)

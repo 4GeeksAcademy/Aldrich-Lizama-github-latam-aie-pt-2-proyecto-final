@@ -62,6 +62,16 @@ ai-engineering-company-project-monorepo/
 4. **Revisa** los `README.md` de cada carpeta raíz para entender responsabilidades (`uis/`, `services/`, `data/`, `skills/`, etc.).
 5. **Empieza a implementar** entregables por hito en `uis/` y `services/`, reutilizando `packages/shared/` y `data/` según corresponda.
 
+### Ejecutar localmente en Codespaces (npx)
+
+Para servir el proyecto estático de forma local en Codespaces, ejecuta:
+
+```bash
+npx --yes serve -s . -l 4173
+```
+
+Luego abre: `http://localhost:4173`
+
 ---
 
 ## Hitos (referencia)
