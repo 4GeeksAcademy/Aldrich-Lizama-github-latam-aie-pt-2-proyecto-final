@@ -163,6 +163,37 @@ function updateCommentsCounter() {
   counter.textContent = t.counter(remaining);
 }
 
+function clearValidationUI() {
+  [
+    "fullName",
+    "email",
+    "phone",
+    "country",
+    "experience",
+    "sector",
+    "englishLevel",
+    "availability",
+    "linkedin",
+    "comments",
+    "terms",
+  ].forEach((field) => showFieldError(field, ""));
+
+  [
+    "fullName",
+    "email",
+    "phone",
+    "country",
+    "experience",
+    "sector",
+    "englishLevel",
+    "linkedin",
+    "comments",
+    "terms",
+  ].forEach((fieldId) => setInputInvalidState(document.getElementById(fieldId), false));
+
+  setRadioGroupInvalidState("availability", false);
+}
+
 function validateForm() {
   const data = new FormData(form);
   const availabilityValue = data.get("availability") || "";
@@ -283,39 +314,21 @@ if (form) {
 
     form.reset();
     updateCommentsCounter();
-
-    [
-      "fullName",
-      "email",
-      "phone",
-      "country",
-      "experience",
-      "sector",
-      "englishLevel",
-      "availability",
-      "linkedin",
-      "comments",
-      "terms",
-    ].forEach((field) => showFieldError(field, ""));
-
-    [
-      "fullName",
-      "email",
-      "phone",
-      "country",
-      "experience",
-      "sector",
-      "englishLevel",
-      "linkedin",
-      "comments",
-      "terms",
-    ].forEach((fieldId) => setInputInvalidState(document.getElementById(fieldId), false));
-
-    setRadioGroupInvalidState("availability", false);
+    clearValidationUI();
 
     if (globalSuccess) {
       globalSuccess.innerHTML = t.successHtml;
       globalSuccess.classList.remove("hidden");
     }
+  });
+
+  form.addEventListener("reset", () => {
+    hideGlobalMessages();
+    clearValidationUI();
+
+    // Espera al reset nativo para leer el valor real del textarea (vacío).
+    requestAnimationFrame(() => {
+      updateCommentsCounter();
+    });
   });
 }
