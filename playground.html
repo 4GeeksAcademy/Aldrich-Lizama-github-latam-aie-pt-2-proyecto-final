@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexova — Hito 2 · Playground</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            nexova: { bg: "#e1e2de", text: "#11303f", muted: "#2f4f5f", border: "#8aa598", accent: "#bcc4ad", hover: "#456b79" },
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body class="bg-nexova-bg text-nexova-text antialiased">
+
+  <header class="border-b border-nexova-border bg-white/40">
+    <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+      <a href="index.html" class="text-lg font-extrabold hover:text-nexova-hover transition-colors">Nexova</a>
+      <a href="index.html" class="border border-nexova-border rounded-md px-3 py-1.5 text-xs font-semibold hover:bg-nexova-accent transition-colors">Volver</a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-6">
+
+    <!-- Stats -->
+    <section class="mb-5 grid grid-cols-3 gap-3 text-center sm:grid-cols-5" id="stats"></section>
+
+    <!-- Data -->
+    <section class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm mb-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold">📋 Candidatos</h2>
+        <span class="text-xs text-nexova-muted" id="data-count"></span>
+      </div>
+      <div class="overflow-x-auto text-xs" id="candidates-preview"></div>
+    </section>
+
+    <!-- Buttons Grid -->
+    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- Filtering -->
+      <div class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm">
+        <h3 class="font-bold mb-2">🔍 Filtrado</h3>
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="filter-skills">Por skills (TS + React)</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="filter-seniority">Senior</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="filter-availability">Inmediata / 2 sem</button>
+        </div>
+        <div class="mt-2 rounded-lg border border-nexova-border bg-white/60 p-3 text-xs font-mono whitespace-pre-wrap max-h-60 overflow-auto" id="out-filter">Haz clic en un filtro</div>
+      </div>
+
+      <!-- Sorting -->
+      <div class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm">
+        <h3 class="font-bold mb-2">↕️ Ordenamiento</h3>
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="sort-salary-asc">Salario ↑</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="sort-salary-desc">Salario ↓</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="sort-exp-asc">Experiencia ↑</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="sort-exp-desc">Experiencia ↓</button>
+        </div>
+        <div class="mt-2 rounded-lg border border-nexova-border bg-white/60 p-3 text-xs font-mono whitespace-pre-wrap max-h-60 overflow-auto" id="out-sort">Haz clic para ordenar</div>
+      </div>
+
+      <!-- Search -->
+      <div class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm">
+        <h3 class="font-bold mb-2">🎯 Búsquedas</h3>
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="search-id">Por ID (C-2024-0451)</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="search-email">Por email (insensitive)</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="search-binary">Binaria salario $4200</button>
+        </div>
+        <div class="mt-2 rounded-lg border border-nexova-border bg-white/60 p-3 text-xs font-mono whitespace-pre-wrap max-h-60 overflow-auto" id="out-search">Haz clic para buscar</div>
+      </div>
+
+      <!-- Scoring -->
+      <div class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm">
+        <h3 class="font-bold mb-2">🏆 Scoring</h3>
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="score-maria">María González</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="score-juan">Juan Pérez</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="score-carolina">Carolina Silva</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="score-ranking">Ranking completo</button>
+        </div>
+        <div class="mt-2 rounded-lg border border-nexova-border bg-white/60 p-3 text-xs font-mono whitespace-pre-wrap max-h-60 overflow-auto" id="out-scoring">Haz clic para puntuar</div>
+      </div>
+
+      <!-- Reports -->
+      <div class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm">
+        <h3 class="font-bold mb-2">📊 Reportes</h3>
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="report-status">Conteo por estado</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="report-avg-salary">Salario promedio</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="report-top-skills">Top 3 skills</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="report-fill-rate">Fill rate</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="report-seniority">Agrupar seniority</button>
+        </div>
+        <div class="mt-2 rounded-lg border border-nexova-border bg-white/60 p-3 text-xs font-mono whitespace-pre-wrap max-h-60 overflow-auto" id="out-reports">Haz clic para generar reporte</div>
+      </div>
+
+      <!-- Validations -->
+      <div class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm">
+        <h3 class="font-bold mb-2">✅ Validaciones</h3>
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="validate-ok">Candidato válido</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="validate-fail">Candidato inválido</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="validate-vac-ok">Vacante válida</button>
+          <button class="rounded-md bg-nexova-text px-3 py-1.5 text-xs font-semibold text-nexova-bg hover:bg-nexova-hover transition-colors" data-op="validate-vac-fail">Vacante inválida</button>
+        </div>
+        <div class="mt-2 rounded-lg border border-nexova-border bg-white/60 p-3 text-xs font-mono whitespace-pre-wrap max-h-60 overflow-auto" id="out-validations">Haz clic para validar</div>
+      </div>
+
+    </section>
+
+    <!-- Vacancy Info -->
+    <section class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm mt-5">
+      <h2 class="font-bold mb-2">📋 Vacante de referencia</h2>
+      <div class="text-xs" id="vacancy-info"></div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-nexova-border text-center py-4 text-xs text-nexova-muted">
+    Nexova — Hito 2: Fundamentos de Programación
+  </footer>
+
+  <script>
+    // ═══ DATA ═══
+    const candidates = [
+      { id: "C-2024-0451", fullName: "María González", email: "maria.gonzalez@email.com", phone: "+56912345678", yearsOfExperience: 5, skills: ["TypeScript", "React", "Node.js", "PostgreSQL"], englishLevel: "B2", seniority: "Semi-Senior", currentSalary: 3500, expectedSalary: 4200, availability: "1 month", location: "Valencia, España", remoteOnly: false, status: "Active" },
+      { id: "C-2024-0452", fullName: "Juan Pérez", email: "juan.perez@email.com", phone: "+56987654321", yearsOfExperience: 3, skills: ["JavaScript", "React", "CSS", "HTML"], englishLevel: "B1", seniority: "Junior", currentSalary: 2200, expectedSalary: 2800, availability: "Immediate", location: "Miami, Florida, Estados Unidos", remoteOnly: true, status: "Active" },
+      { id: "C-2024-0453", fullName: "Carolina Silva", email: "carolina.silva@email.com", phone: "+56911223344", yearsOfExperience: 8, skills: ["TypeScript", "Node.js", "PostgreSQL", "Docker", "AWS"], englishLevel: "C1", seniority: "Senior", currentSalary: 5500, expectedSalary: 6500, availability: "2 weeks", location: "Valencia, España", remoteOnly: false, status: "Active" },
+    ];
+
+    const vacancy = { id: "V-2024-0892", title: "Senior Full-Stack Developer", companyName: "TechCorp Solutions", requiredSkills: ["TypeScript", "React", "Node.js"], preferredSkills: ["PostgreSQL", "Docker"], minYearsExperience: 4, maxYearsExperience: 8, requiredEnglishLevel: "B2", requiredSeniority: "Senior", salaryRangeMin: 5000, salaryRangeMax: 7000, isRemote: true, location: "Remote", status: "Open" };
+
+    const processes = [
+      { id: "SP-2024-1523", candidateId: "C-2024-0451", vacancyId: "V-2024-0892", stage: "Hired", score: 85 },
+      { id: "SP-2024-1524", candidateId: "C-2024-0452", vacancyId: "V-2024-0892", stage: "Rejected", score: 45 },
+      { id: "SP-2024-1525", candidateId: "C-2024-0453", vacancyId: "V-2024-0892", stage: "Hired", score: 92 },
+    ];
+
+    const SENIORITY_ORDER = ["Junior", "Semi-Senior", "Senior", "Lead", "Executive"];
+    const ENGLISH_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2", "Native"];
+
+    // ═══ LOGIC ═══ (mirrors src/utils/)
+
+    function isValidEmail(email) {
+      const at = email.indexOf("@");
+      if (at < 1) return false;
+      const dot = email.lastIndexOf(".");
+      return dot >= at + 2 && dot < email.length - 1;
+    }
+
+    function calcScore(c, v) {
+      let score = 0;
+      const cSkills = c.skills.map(s => s.toLowerCase());
+      const rSkills = v.requiredSkills.map(s => s.toLowerCase());
+      const pSkills = v.preferredSkills.map(s => s.toLowerCase());
+      const hasAll = rSkills.every(s => cSkills.includes(s));
+      const halfCount = rSkills.filter(s => cSkills.includes(s)).length;
+      if (hasAll) score += 40;
+      else if (halfCount >= rSkills.length / 2) score += 20;
+      const prefCount = pSkills.filter(s => cSkills.includes(s)).length;
+      score += Math.min(prefCount * 10, 20);
+      const exp = c.yearsOfExperience;
+      if (exp >= v.minYearsExperience && exp <= v.maxYearsExperience) score += 20;
+      else if (Math.abs(exp - v.minYearsExperience) <= 2 || Math.abs(exp - v.maxYearsExperience) <= 2) score += 10;
+      const diff = Math.abs(SENIORITY_ORDER.indexOf(c.seniority) - SENIORITY_ORDER.indexOf(v.requiredSeniority));
+      if (diff === 0) score += 15;
+      else if (diff === 1) score += 7;
+      if (ENGLISH_ORDER.indexOf(c.englishLevel) >= ENGLISH_ORDER.indexOf(v.requiredEnglishLevel)) score += 15;
+      const sal = c.expectedSalary;
+      if (sal >= v.salaryRangeMin && sal <= v.salaryRangeMax) score += 10;
+      else if (sal <= v.salaryRangeMax * 1.2) score += 5;
+      return Math.min(score, 100);
+    }
+
+    function validateCandidate(c) {
+      const errors = [];
+      if (c.yearsOfExperience < 0 || c.yearsOfExperience > 50) errors.push("yearsOfExperience debe estar entre 0 y 50");
+      if (c.currentSalary <= 0) errors.push("currentSalary debe ser > 0");
+      if (c.expectedSalary <= 0) errors.push("expectedSalary debe ser > 0");
+      if (!c.skills || c.skills.length < 1) errors.push("skills debe tener al menos 1");
+      if (!isValidEmail(c.email)) errors.push("email inválido");
+      if (!c.phone || !c.phone.trim()) errors.push("phone no debe estar vacío");
+      return { valid: errors.length === 0, errors };
+    }
+
+    function validateVacancy(v) {
+      const errors = [];
+      if (!v.requiredSkills || v.requiredSkills.length < 1) errors.push("requiredSkills debe tener al menos 1");
+      if (v.minYearsExperience < 0) errors.push("minYearsExperience debe ser >= 0");
+      if (v.maxYearsExperience < v.minYearsExperience) errors.push("maxYearsExperience debe ser >= minYearsExperience");
+      if (v.salaryRangeMin <= 0) errors.push("salaryRangeMin debe ser > 0");
+      if (v.salaryRangeMax <= 0) errors.push("salaryRangeMax debe ser > 0");
+      if (v.salaryRangeMax < v.salaryRangeMin) errors.push("salaryRangeMax debe ser >= salaryRangeMin");
+      return { valid: errors.length === 0, errors };
+    }
+
+    // ═══ UI ═══
+
+    function renderStats() {
+      const avg = candidates.reduce((s, c) => s + c.expectedSalary, 0) / candidates.length;
+      document.getElementById("stats").innerHTML = [
+        ["👥", candidates.length, "Candidatos"],
+        ["📋", "1", "Vacante"],
+        ["🔄", processes.length, "Procesos"],
+        ["💰", `$${avg.toFixed(0)}`, "Salario prom."],
+        ["📈", `${(processes.filter(p => p.stage === "Hired").length / processes.length * 100).toFixed(1)}%`, "Fill rate"],
+      ].map(([icon, val, label]) => `<div class="rounded-xl border border-nexova-border bg-nexova-bg p-4 shadow-sm"><div class="text-lg">${icon}</div><div class="text-xl font-bold">${val}</div><div class="text-xs text-nexova-muted">${label}</div></div>`).join("");
+    }
+
+    function renderCandidates() {
+      const tbody = candidates.map(c => `<tr class="border-b border-nexova-border/50">
+        <td class="py-1.5 pr-2">${c.fullName}</td>
+        <td class="py-1.5 pr-2">${c.skills.map(s => `<span class="inline-block rounded-full bg-nexova-accent px-2.5 py-0.5 text-xs font-medium">${s}</span>`).join(" ")}</td>
+        <td class="py-1.5 pr-2">${c.seniority}</td>
+        <td class="py-1.5 pr-2">${c.yearsOfExperience}a</td>
+        <td class="py-1.5 pr-2">$${c.expectedSalary.toLocaleString()}</td>
+        <td class="py-1.5 pr-2">${c.englishLevel}</td>
+        <td class="py-1.5 pr-2">${c.availability}</td>
+      </tr>`).join("");
+      document.getElementById("candidates-preview").innerHTML = `<table class="w-full text-left"><thead><tr class="text-nexova-muted border-b border-nexova-border"><th class="py-1.5 pr-2 font-semibold">Nombre</th><th class="py-1.5 pr-2 font-semibold">Skills</th><th class="py-1.5 pr-2 font-semibold">Seniority</th><th class="py-1.5 pr-2 font-semibold">Exp.</th><th class="py-1.5 pr-2 font-semibold">Salario</th><th class="py-1.5 pr-2 font-semibold">Inglés</th><th class="py-1.5 pr-2 font-semibold">Disponibilidad</th></tr></thead><tbody>${tbody}</tbody></table>`;
+      document.getElementById("data-count").textContent = `${candidates.length} candidatos cargados`;
+      document.getElementById("vacancy-info").innerHTML = `<strong>${vacancy.title}</strong> — ${vacancy.companyName} · Skills: ${vacancy.requiredSkills.join(", ")} · Rango: $${vacancy.salaryRangeMin}-$${vacancy.salaryRangeMax} · Seniority: ${vacancy.requiredSeniority} · Inglés: ${vacancy.requiredEnglishLevel}`;
+    }
+
+    function out(id, html) { document.getElementById(id).innerHTML = html; }
+
+    function showNames(arr) { return arr.map(c => `• ${c.fullName}`).join("\n"); }
+
+    // ═══ EVENTS ═══
+
+    document.querySelectorAll("[data-op]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const op = btn.dataset.op;
+        switch (op) {
+          case "filter-skills": {
+            const r = candidates.filter(c => ["TypeScript", "React"].every(s => c.skills.map(x => x.toLowerCase()).includes(s.toLowerCase())));
+            out("out-filter", `✅ ${r.length} candidatos:\n${showNames(r)}`);
+            break;
+          }
+          case "filter-seniority": {
+            const r = candidates.filter(c => c.seniority === "Senior");
+            out("out-filter", `✅ ${r.length} candidatos:\n${showNames(r)}`);
+            break;
+          }
+          case "filter-availability": {
+            const r = candidates.filter(c => ["Immediate", "2 weeks"].includes(c.availability));
+            out("out-filter", `✅ ${r.length} candidatos:\n${r.map(c => `• ${c.fullName} — ${c.availability}`).join("\n")}`);
+            break;
+          }
+          case "sort-salary-asc": {
+            const r = [...candidates].sort((a, b) => a.expectedSalary - b.expectedSalary);
+            out("out-sort", `⬆️ Salario ascendente:\n${r.map(c => `• ${c.fullName}: $${c.expectedSalary}`).join("\n")}`);
+            break;
+          }
+          case "sort-salary-desc": {
+            const r = [...candidates].sort((a, b) => b.expectedSalary - a.expectedSalary);
+            out("out-sort", `⬇️ Salario descendente:\n${r.map(c => `• ${c.fullName}: $${c.expectedSalary}`).join("\n")}`);
+            break;
+          }
+          case "sort-exp-asc": {
+            const r = [...candidates].sort((a, b) => a.yearsOfExperience - b.yearsOfExperience);
+            out("out-sort", `⬆️ Experiencia ascendente:\n${r.map(c => `• ${c.fullName}: ${c.yearsOfExperience}a`).join("\n")}`);
+            break;
+          }
+          case "sort-exp-desc": {
+            const r = [...candidates].sort((a, b) => b.yearsOfExperience - a.yearsOfExperience);
+            out("out-sort", `⬇️ Experiencia descendente:\n${r.map(c => `• ${c.fullName}: ${c.yearsOfExperience}a`).join("\n")}`);
+            break;
+          }
+          case "search-id": {
+            const r = candidates.find(c => c.id === "C-2024-0451");
+            out("out-search", r ? `✅ Encontrado: ${r.fullName} (${r.email})` : "❌ No encontrado");
+            break;
+          }
+          case "search-email": {
+            const r = candidates.find(c => c.email.toLowerCase() === "juan.perez@email.com");
+            out("out-search", r ? `✅ Encontrado: ${r.fullName}` : "❌ No encontrado");
+            break;
+          }
+          case "search-binary": {
+            const sorted = [...candidates].sort((a, b) => a.expectedSalary - b.expectedSalary);
+            let l = 0, r = sorted.length - 1, idx = -1;
+            while (l <= r) { const m = Math.floor((l + r) / 2); if (sorted[m].expectedSalary === 4200) { idx = m; break; } sorted[m].expectedSalary < 4200 ? l = m + 1 : r = m - 1; }
+            out("out-search", idx !== -1 ? `✅ Encontrado en índice ${idx}: ${sorted[idx].fullName} (salario $${sorted[idx].expectedSalary})` : "❌ No encontrado");
+            break;
+          }
+          case "score-maria":
+            out("out-scoring", `🏆 ${candidates[0].fullName}: ${calcScore(candidates[0], vacancy)}/100`);
+            break;
+          case "score-juan":
+            out("out-scoring", `🏆 ${candidates[1].fullName}: ${calcScore(candidates[1], vacancy)}/100`);
+            break;
+          case "score-carolina":
+            out("out-scoring", `🏆 ${candidates[2].fullName}: ${calcScore(candidates[2], vacancy)}/100`);
+            break;
+          case "score-ranking": {
+            const ranked = candidates.map(c => ({ name: c.fullName, score: calcScore(c, vacancy) })).sort((a, b) => b.score - a.score);
+            out("out-scoring", `🏆 Ranking:\n${ranked.map((r, i) => `  #${i+1} ${r.name}: ${r.score}/100`).join("\n")}`);
+            break;
+          }
+          case "report-status": {
+            const counts = { Active: 0, "In process": 0, Hired: 0, Inactive: 0 };
+            candidates.forEach(c => counts[c.status]++);
+            out("out-reports", Object.entries(counts).map(([k, v]) => `• ${k}: ${v}`).join("\n"));
+            break;
+          }
+          case "report-avg-salary": {
+            const avg = candidates.reduce((s, c) => s + c.expectedSalary, 0) / candidates.length;
+            out("out-reports", `💰 Salario esperado promedio: $${avg.toFixed(2)}`);
+            break;
+          }
+          case "report-top-skills": {
+            const map = new Map();
+            candidates.forEach(c => { const seen = new Set(); c.skills.forEach(s => { const k = s.toLowerCase(); if (!seen.has(k)) { seen.add(k); map.set(k, (map.get(k) || 0) + 1); }}); });
+            const top = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3);
+            out("out-reports", `🏆 Top 3 habilidades:\n${top.map(([s, c], i) => `  #${i+1} ${s}: ${c} candidato(s)`).join("\n")}`);
+            break;
+          }
+          case "report-fill-rate": {
+            const filled = processes.filter(p => p.stage === "Hired").length;
+            const rate = processes.length ? (filled / processes.length * 100).toFixed(2) : "0.00";
+            out("out-reports", `📈 Fill rate: ${rate}% (${filled} de ${processes.length} procesos contratados)`);
+            break;
+          }
+          case "report-seniority": {
+            const groups = { Junior: [], "Semi-Senior": [], Senior: [], Lead: [], Executive: [] };
+            candidates.forEach(c => groups[c.seniority].push(c.fullName));
+            out("out-reports", Object.entries(groups).map(([k, v]) => `• ${k}: ${v.length ? v.join(", ") : "—"}`).join("\n"));
+            break;
+          }
+          case "validate-ok": {
+            const r = validateCandidate(candidates[0]);
+            out("out-validations", r.valid ? `✅ ${candidates[0].fullName}: VÁLIDO` : `❌ INVÁLIDO:\n${r.errors.join("\n")}`);
+            break;
+          }
+          case "validate-fail": {
+            const r = validateCandidate({ ...candidates[0], yearsOfExperience: -1, currentSalary: 0, skills: [], email: "invalido", phone: "" });
+            out("out-validations", `❌ INVÁLIDO:\n${r.errors.join("\n")}`);
+            break;
+          }
+          case "validate-vac-ok": {
+            const r = validateVacancy(vacancy);
+            out("out-validations", r.valid ? `✅ ${vacancy.title}: VÁLIDA` : `❌ INVÁLIDA:\n${r.errors.join("\n")}`);
+            break;
+          }
+          case "validate-vac-fail": {
+            const r = validateVacancy({ ...vacancy, requiredSkills: [], minYearsExperience: -1, maxYearsExperience: 2, salaryRangeMin: 0, salaryRangeMax: 0 });
+            out("out-validations", `❌ INVÁLIDA:\n${r.errors.join("\n")}`);
+            break;
+          }
+        }
+      });
+    });
+
+    renderStats();
+    renderCandidates();
+  </script>
+</body>
+</html>

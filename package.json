@@ -1,0 +1,14 @@
+{
+  "name": "nexova-candidate-management",
+  "version": "1.0.0",
+  "description": "Nexova - Candidate management utilities for recruitment operations",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "demo": "npx tsx src/demo.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0"
+  }
+}
