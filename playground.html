@@ -176,7 +176,7 @@
       if (ENGLISH_ORDER.indexOf(c.englishLevel) >= ENGLISH_ORDER.indexOf(v.requiredEnglishLevel)) score += 15;
       const sal = c.expectedSalary;
       if (sal >= v.salaryRangeMin && sal <= v.salaryRangeMax) score += 10;
-      else if (sal <= v.salaryRangeMax * 1.2) score += 5;
+      else if (sal > v.salaryRangeMax && sal <= v.salaryRangeMax * 1.2) score += 5;
       return Math.min(score, 100);
     }
 

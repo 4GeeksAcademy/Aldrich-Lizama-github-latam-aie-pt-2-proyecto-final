@@ -107,7 +107,10 @@ export function calculateCandidateScore(
     expected <= vacancy.salaryRangeMax
   ) {
     score += 10;
-  } else if (expected <= vacancy.salaryRangeMax * 1.2) {
+  } else if (
+    expected > vacancy.salaryRangeMax &&
+    expected <= vacancy.salaryRangeMax * 1.2
+  ) {
     // Up to 20% above max
     score += 5;
   }
