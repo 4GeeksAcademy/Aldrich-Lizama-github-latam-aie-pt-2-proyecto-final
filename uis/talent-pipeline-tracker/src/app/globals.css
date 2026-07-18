@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-nexova-bg: #e1e2de;
+  --color-nexova-text: #11303f;
+  --color-nexova-muted: #2f4f5f;
+  --color-nexova-border: #8aa598;
+  --color-nexova-accent: #bcc4ad;
+  --color-nexova-hover: #456b79;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--color-nexova-bg);
+  color: var(--color-nexova-text);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
