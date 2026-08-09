@@ -1,0 +1,84 @@
+:root {
+  --bg: #e1e2de;
+  --text: #11303f;
+  --muted: #2f4f5f;
+  --border: #8aa598;
+  --accent: #bcc4ad;
+  --brand: #11303f;
+  --brand-hover: #456b79;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at 10% 10%, #f5f6f2, var(--bg));
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+.container {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.section {
+  padding: 3.5rem 0;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: #eef0ea;
+  box-shadow: 0 8px 20px rgba(17, 48, 63, 0.08);
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.1rem;
+  border-radius: 0.6rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: var(--brand-hover);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.grid-3 {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-2 {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .grid-3,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
