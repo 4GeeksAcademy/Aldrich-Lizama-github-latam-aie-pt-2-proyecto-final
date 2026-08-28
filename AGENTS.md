@@ -11,18 +11,37 @@ Cumplimiento:
 
 ## 1. Archivos de Contexto Obligatorios (Inicio de cada sesion)
 
+> **Skill asociada:** `.agents/skills/session-initializer/SKILL.md` — implementa operativamente este protocolo.
+
 Al inicio de cada sesion, el agente debe leer obligatoriamente y en este orden:
 
-1. Todos los archivos contenidos en la carpeta context.nexova.
-2. memory-bank/projectbrief.md.
-3. memory-bank/techContext.md.
-4. memory-bank/progress.md.
+1. `.agents/skills/session-initializer/SKILL.md` — leer la skill de inicialización.
+2. `AGENTS.md` — leer las reglas de gobernanza globales.
+3. **Todos los archivos contenidos en la carpeta `context.nexova/`, de forma recursiva.** Esto incluye:
+   - Archivos en la raíz de `context.nexova/`.
+   - Archivos dentro de todas las subcarpetas (cualquier nivel de anidamiento).
+   - Archivos dentro de subcarpetas de esas subcarpetas.
+   - **No asumir que solo los archivos del nivel superior son suficientes.** La lectura debe atravesar todo el árbol de directorios.
+4. `memory-bank/projectbrief.md`.
+5. `memory-bank/techContext.md`.
+6. `memory-bank/progress.md`.
 
 Reglas de aplicacion:
 
 - No iniciar implementaciones sin completar esta lectura.
 - No asumir contexto historico no documentado en estos archivos.
 - Si falta algun archivo obligatorio, registrar el bloqueo y solicitar accion humana.
+- La lectura de `context.nexova/` debe ser recursiva (subcarpetas incluidas) en cada sesion.
+
+### Invocacion manual de la skill
+
+Si la skill `session-initializer` no se ejecuta automaticamente al iniciar la sesion, el agente debe seguir estas frases de activacion (cualquiera funciona):
+
+- *"Ejecuta la skill de inicializacion de sesion"*
+- *"Inicializa el contexto del proyecto Nexova"*
+- *"Lee el context.nexova y el memory-bank"*
+- *"Ejecuta session-initializer"*
+- *"Lee el archivo `.agents/skills/session-initializer/SKILL.md` y ejecuta sus instrucciones"*
 
 ## 2. Flujo Pre-Commit Obligatorio (Secuencial)
 
