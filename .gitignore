@@ -1,0 +1,8 @@
+node_modules/
+.next/
+__pycache__/
+*.pyc
+*.tsbuildinfo
+*.db.json
+.env
+.env.local

@@ -83,12 +83,14 @@ export default function BreakdownTable({
                   >
                     <div
                       style={{
-                        width: `${Math.min(pct, 100)}%`,
+                        width: "100%",
                         height: "100%",
                         borderRadius: "4px",
                         background: barColor,
                         opacity: 0.8,
-                        transition: "width 0.4s ease",
+                        transformOrigin: "left",
+                        transform: `scaleX(${Math.min(pct, 100) / 100})`,
+                        transition: "opacity 0.4s ease, transform 0.4s ease",
                       }}
                     />
                   </div>

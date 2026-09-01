@@ -38,14 +38,33 @@ except ImportError:
 
 from nexova_analyzer import analyze_rows, export_csv_string, format_report_text
 
+# ── Importar router de proveedores (Suppliers Directory) ──
+_REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+from services.api.routes.suppliers import router as suppliers_router
+from services.api.seed import seed_suppliers
+
+# ── Lifespan handler (startup / shutdown) ────────────────
+from contextlib import asynccontextmanager
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    """Sembrar datos iniciales al arrancar."""
+    seed_suppliers()
+    yield
+
+
 # ══════════════════════════════════════════════════════════
 #  App
 # ══════════════════════════════════════════════════════════
 
 app = FastAPI(
-    title="Nexova Incidents Analysis API",
-    description="API para analizar archivos CSV de tickets de soporte Nexova",
-    version="1.0.0",
+    title="Nexova API — Incidencias y Proveedores",
+    description="API para análisis de incidencias y directorio de proveedores de Nexova",
+    version="1.1.0",
+    lifespan=lifespan,
 )
 
 # ── CORS: permitir que el frontend (Next.js) se comunique ──
@@ -57,6 +76,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Incluir routers ─────────────────────────────────────
+app.include_router(suppliers_router)
+
 
 # ══════════════════════════════════════════════════════════
 #  Endpoints
@@ -67,11 +89,16 @@ app.add_middleware(
 async def root():
     """Health check / información básica."""
     return {
-        "service": "Nexova Incidents Analysis API",
-        "version": "1.0.0",
+        "service": "Nexova API — Incidencias y Proveedores",
+        "version": "1.1.0",
         "endpoints": {
             "POST /api/incidents/analyze": "Subir CSV para análisis",
             "GET /api/incidents/results/export": "Descargar resultados CSV",
+            "GET /api/suppliers": "Listar proveedores (filtros: ?country=, ?category=)",
+            "GET /api/suppliers/{id}": "Obtener un proveedor por ID",
+            "POST /api/suppliers": "Registrar nuevo proveedor",
+            "PUT /api/suppliers/{id}/rate": "Actualizar tarifa mensual",
+            "PUT /api/suppliers/{id}/status": "Activar o suspender proveedor",
         },
     }
 
@@ -149,6 +176,11 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 8000))
     print(f"🔧 Nexova API corriendo en http://localhost:{port}")
-    print(f"   📥 POST /api/incidents/analyze  — Subir CSV")
+    print(f"   📥 POST /api/incidents/analyze       — Subir CSV")
     print(f"   📤 GET  /api/incidents/results/export — Descargar CSV")
+    print(f"   📋 GET  /api/suppliers                — Listar proveedores")
+    print(f"   🔍 GET  /api/suppliers/{{id}}          — Detalle proveedor")
+    print(f"   ➕ POST /api/suppliers                — Registrar proveedor")
+    print(f"   💰 PUT  /api/suppliers/{{id}}/rate      — Actualizar tarifa")
+    print(f"   🔄 PUT  /api/suppliers/{{id}}/status    — Activar/suspender")
     uvicorn.run(app, host="0.0.0.0", port=port, reload=False)

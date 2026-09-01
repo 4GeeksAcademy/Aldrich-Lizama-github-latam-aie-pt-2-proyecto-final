@@ -1,0 +1,313 @@
+{
+  "suppliers": {
+    "10": {
+      "categories": [
+        "payroll_and_hr_software"
+      ],
+      "contact_email": "soporte@sage.com",
+      "contract_renewal_date": "2025-10-01",
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 999.99,
+      "name": "Sage HR",
+      "notes": "Software de n\u00f3minas y gesti\u00f3n de personal para la sede de Valencia.",
+      "status": "suspended",
+      "updated_at": "2026-09-01T06:07:38.950080+00:00"
+    },
+    "11": {
+      "categories": [
+        "payroll_and_hr_software"
+      ],
+      "contact_email": "support@gusto.com",
+      "contract_renewal_date": null,
+      "country": "USA",
+      "currency": "USD",
+      "monthly_rate": 280.0,
+      "name": "Gusto",
+      "notes": "Gesti\u00f3n de n\u00f3minas para los empleados de la oficina de Miami.",
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "12": {
+      "categories": [
+        "background_check"
+      ],
+      "contact_email": "sales@checkr.com",
+      "contract_renewal_date": "2025-11-30",
+      "country": "USA",
+      "currency": "USD",
+      "monthly_rate": 195.0,
+      "name": "Checkr",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "13": {
+      "categories": [
+        "it_and_software_licenses"
+      ],
+      "contact_email": "enterprise@microsoft.com",
+      "contract_renewal_date": null,
+      "country": "Spain",
+      "currency": "EUR",
+      "deleted_at": "2026-09-01T06:25:46.109424+00:00",
+      "monthly_rate": 760.0,
+      "name": "Microsoft 365 Business",
+      "notes": "Licencias para toda la plantilla de Valencia y Miami.",
+      "status": "suspended",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "14": {
+      "categories": [
+        "office_and_facilities"
+      ],
+      "contact_email": "valencia@regus.com",
+      "contract_renewal_date": "2025-07-01",
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 2400.0,
+      "name": "Regus Valencia",
+      "notes": "Alquiler de la oficina principal en Valencia. Incluye sala de reuniones.",
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "15": {
+      "categories": [
+        "office_and_facilities"
+      ],
+      "contact_email": "miami@wework.com",
+      "contract_renewal_date": "2025-09-30",
+      "country": "USA",
+      "currency": "USD",
+      "monthly_rate": 3100.0,
+      "name": "WeWork Miami",
+      "notes": null,
+      "status": "suspended",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "16": {
+      "categories": [
+        "ats_software"
+      ],
+      "contact_email": null,
+      "contract_renewal_date": null,
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 500.0,
+      "name": "Test Supplier",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T03:42:07.085528+00:00"
+    },
+    "17": {
+      "categories": [
+        "job_boards"
+      ],
+      "contact_email": "account@linkedin.com",
+      "contract_renewal_date": "2025-03-31",
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 1200.0,
+      "name": "LinkedIn Talent Solutions",
+      "notes": "Licencia corporativa para publicaci\u00f3n de ofertas y b\u00fasqueda de candidatos.",
+      "status": "active",
+      "updated_at": "2026-09-01T04:23:22.686952+00:00"
+    },
+    "18": {
+      "categories": [
+        "ats_software"
+      ],
+      "contact_email": null,
+      "contract_renewal_date": null,
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 100.0,
+      "name": "Test",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T06:02:31.322058+00:00"
+    },
+    "19": {
+      "categories": [
+        "office_and_facilities"
+      ],
+      "contact_email": "aldraich@gmail.com",
+      "contract_renewal_date": "2027-05-24",
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 1300.0,
+      "name": "uldraich",
+      "notes": "sub contrata de personal de limpieza",
+      "status": "suspended",
+      "updated_at": "2026-09-01T06:13:13.138720+00:00"
+    },
+    "2": {
+      "categories": [
+        "job_boards"
+      ],
+      "contact_email": "empresas@infojobs.net",
+      "contract_renewal_date": "2025-06-30",
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 490.0,
+      "name": "InfoJobs Premium",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "20": {
+      "categories": [
+        "ats_software"
+      ],
+      "contact_email": "test@test.com",
+      "contract_renewal_date": null,
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 500.0,
+      "name": "Proveedor Test",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T06:06:50.128143+00:00"
+    },
+    "21": {
+      "categories": [
+        "ats_software"
+      ],
+      "contact_email": "test@test.com",
+      "contract_renewal_date": null,
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 500.0,
+      "name": "Proveedor Test",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T06:07:15.196547+00:00"
+    },
+    "22": {
+      "categories": [
+        "training_platforms"
+      ],
+      "contact_email": "teams@coursera.com",
+      "contract_renewal_date": null,
+      "country": "USA",
+      "currency": "USD",
+      "monthly_rate": 399.0,
+      "name": "Coursera for Teams",
+      "notes": "Suspendido por bajo uso. Revisar antes de Q4.",
+      "status": "suspended",
+      "updated_at": "2026-09-01T06:10:13.763697+00:00"
+    },
+    "23": {
+      "categories": [
+        "ats_software"
+      ],
+      "contact_email": null,
+      "contract_renewal_date": null,
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 500.0,
+      "name": "Frontend Test",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T06:11:09.051655+00:00"
+    },
+    "24": {
+      "categories": [
+        "ats_software"
+      ],
+      "contact_email": null,
+      "contract_renewal_date": null,
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 500.0,
+      "name": "Rate String Test",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T06:11:09.158545+00:00"
+    },
+    "3": {
+      "categories": [
+        "job_boards"
+      ],
+      "contact_email": "sales@indeed.com",
+      "contract_renewal_date": null,
+      "country": "USA",
+      "currency": "USD",
+      "monthly_rate": 850.0,
+      "name": "Indeed Sponsored",
+      "notes": "Campa\u00f1as de pago por clic para perfiles de customer support en Miami.",
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "4": {
+      "categories": [
+        "ats_software"
+      ],
+      "contact_email": "support@workable.com",
+      "contract_renewal_date": "2025-09-15",
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 299.0,
+      "name": "Workable",
+      "notes": "ATS principal para el equipo de selecci\u00f3n de Valencia.",
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "5": {
+      "categories": [
+        "ats_software"
+      ],
+      "contact_email": "accounts@greenhouse.io",
+      "contract_renewal_date": null,
+      "country": "USA",
+      "currency": "USD",
+      "monthly_rate": 620.0,
+      "name": "Greenhouse",
+      "notes": "Suspendido tras no renovar. Sergio est\u00e1 evaluando si migrar todo a Workable.",
+      "status": "suspended",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "6": {
+      "categories": [
+        "assessment_tools"
+      ],
+      "contact_email": "clientes@thomas.es",
+      "contract_renewal_date": "2025-12-01",
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 380.0,
+      "name": "Thomas International",
+      "notes": "Tests de personalidad y aptitud para procesos de mandos intermedios.",
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "7": {
+      "categories": [
+        "video_interview"
+      ],
+      "contact_email": "support@hirevue.com",
+      "contract_renewal_date": "2025-08-31",
+      "country": "USA",
+      "currency": "USD",
+      "monthly_rate": 540.0,
+      "name": "HireVue",
+      "notes": null,
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    },
+    "8": {
+      "categories": [
+        "training_platforms"
+      ],
+      "contact_email": "business@udemy.com",
+      "contract_renewal_date": "2026-01-15",
+      "country": "Spain",
+      "currency": "EUR",
+      "monthly_rate": 420.0,
+      "name": "Udemy Business",
+      "notes": "Licencias para el equipo interno. Gestionado por Elena Vargas.",
+      "status": "active",
+      "updated_at": "2026-09-01T03:34:03.621366+00:00"
+    }
+  }
+}

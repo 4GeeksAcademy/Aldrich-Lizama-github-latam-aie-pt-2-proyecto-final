@@ -70,6 +70,18 @@ export default function BackofficeLayout({
               >
                 Análisis de Incidencias
               </Link>
+              <Link
+                href="/suppliers"
+                style={{
+                  color: "var(--muted)",
+                  textDecoration: "none",
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                  transition: "color 0.2s",
+                }}
+              >
+                Proveedores
+              </Link>
             </nav>
 
             <span style={{ color: "var(--muted)", fontSize: "0.9rem" }}>

@@ -5,6 +5,10 @@
   --muted: #b3c7be;
   --accent: #7ec0a7;
   --border: #2e4d5f;
+  --danger: #e74c3c;
+  --warning: #f1c40f;
+  --success: #7ec0a7;
+  color-scheme: dark;
 }
 
 * {
@@ -18,10 +22,17 @@ body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(180deg, #08131b 0%, var(--bg) 60%);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .wrapper {
   width: min(1080px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.wrapper--wide {
+  width: min(1280px, calc(100% - 2rem));
   margin: 0 auto;
 }
 
@@ -45,10 +56,121 @@ body {
 }
 
 .module-card {
-  transition: border-color 0.2s, transform 0.2s;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .module-card:hover {
   border-color: var(--accent) !important;
   transform: translateY(-2px);
+}
+
+/* ── Botones base ───────────────────────────────────── */
+.btn {
+  border: none;
+  border-radius: 0.6rem;
+  padding: 0.5rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: #0f1b24;
+}
+
+.btn--danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+/* ── Inputs base ────────────────────────────────────── */
+input, select, textarea {
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+/* ── Selects y dropdowns con tema oscuro ──────────── */
+select {
+  background: var(--card);
+  color: var(--text);
+}
+
+option {
+  background: var(--card);
+  color: var(--text);
+  padding: 0.4rem 0.5rem;
+}
+
+option:disabled {
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+/* ── Tablas ─────────────────────────────────────────── */
+table {
+  font-size: 0.85rem;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+td {
+  padding: 0.75rem 0.5rem;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(46, 77, 95, 0.3);
+}
+
+tbody tr {
+  transition: background 0.15s ease;
+}
+
+tbody tr:hover {
+  background: rgba(126, 192, 167, 0.04);
+}
+
+/* ── Ocultar columna de actualización en móvil ────── */
+.hide-mobile {
+  display: table-cell;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* ── Animaciones ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

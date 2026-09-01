@@ -89,11 +89,13 @@ export default function SatisfactionIndex({ data }: Props) {
               >
                 <div
                   style={{
-                    width: `${Math.min(pct, 100)}%`,
+                    width: "100%",
                     height: "100%",
                     borderRadius: "5px",
                     background: SCORE_COLORS[score],
-                    transition: "width 0.4s ease",
+                    transformOrigin: "left",
+                    transform: `scaleX(${Math.min(pct, 100) / 100})`,
+                    transition: "opacity 0.4s ease, transform 0.4s ease",
                   }}
                 />
               </div>

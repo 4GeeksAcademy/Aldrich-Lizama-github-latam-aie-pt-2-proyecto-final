@@ -60,6 +60,27 @@ export default function BackofficeHomePage() {
             de candidatos. (Próximamente)
           </p>
         </article>
+
+        <Link
+          href="/suppliers"
+          style={{ textDecoration: "none" }}
+        >
+          <article
+            className="card module-card"
+            style={{
+              cursor: "pointer",
+              height: "100%",
+            }}
+          >
+            <h3 style={{ margin: 0, color: "var(--accent)" }}>
+              Directorio de Proveedores
+            </h3>
+            <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+              Registro oficial de proveedores externos de Nexova. Filtros por
+              país y categoría, actualización de tarifas y control de estado.
+            </p>
+          </article>
+        </Link>
       </section>
 
       {/* Métricas de negocio */}
