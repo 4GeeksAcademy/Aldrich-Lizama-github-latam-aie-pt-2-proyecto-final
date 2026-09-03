@@ -7,6 +7,8 @@ Schemas Pydantic para:
   - Perfil de usuario (Profile)
   - CRUD de usuarios (UserCreate, UserUpdate, UserResponse)
   - Token JWT (Token, TokenData)
+  - Restablecimiento de contraseña
+      (ForgotPasswordRequest, ResetPasswordRequest, ChangePasswordRequest)
 
 Requerimientos adicionales:
   pip install "pydantic[email-validator]>=2.0.0"
@@ -217,6 +219,52 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     """Schema para el payload decodificado del token JWT."""
+
+
+# ══════════════════════════════════════════════════════════
+#  Restablecimiento de Contraseña
+# ══════════════════════════════════════════════════════════
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Schema para solicitar restablecimiento de contraseña."""
+
+    email: EmailStr = Field(
+        ...,
+        description="Correo electrónico del usuario registrado",
+    )
+
+
+class ResetPasswordRequest(BaseModel):
+    """Schema para ejecutar el restablecimiento de contraseña."""
+
+    token: str = Field(
+        ...,
+        min_length=1,
+        description="Token de restablecimiento recibido por correo",
+    )
+    new_password: str = Field(
+        ...,
+        min_length=8,
+        max_length=128,
+        description="Nueva contraseña (mín. 8 caracteres)",
+    )
+
+
+class ChangePasswordRequest(BaseModel):
+    """Schema para cambiar contraseña estando autenticado."""
+
+    current_password: str = Field(
+        ...,
+        min_length=1,
+        description="Contraseña actual del usuario",
+    )
+    new_password: str = Field(
+        ...,
+        min_length=8,
+        max_length=128,
+        description="Nueva contraseña (mín. 8 caracteres)",
+    )
 
     user_id: Optional[int] = Field(
         None,

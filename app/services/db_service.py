@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-db_service.py — Nexova API · TinyDB persistence for Users & Profiles
+db_service.py — Nexova API · TinyDB persistence for Users, Profiles & Password Resets
 =====================================================================
 Servicio de persistencia para los módulos de autenticación y usuarios
 utilizando exclusivamente TinyDB como base de datos embebida.
 
 Tablas:
-  - users     → Almacena usuarios con contraseña hasheada.
-  - profiles  → Almacena el perfil de cada usuario (relación 1:1).
+  - users           → Almacena usuarios con contraseña hasheada.
+  - profiles        → Almacena el perfil de cada usuario (relación 1:1).
+  - password_resets → Tokens de restablecimiento de contraseña.
 
 Dependencias:
   pip install tinydb
@@ -18,12 +19,20 @@ Uso:
         get_all_users, update_user, delete_user,
         create_profile, get_profile_by_user_id,
         update_profile_by_user_id, delete_profile_by_user_id,
+        create_password_reset_token, get_password_reset_token,
+        mark_token_as_used, update_user_password,
     )
 
     user = create_user(email="user@nexova.com", password="secret123", name="Aldrich")
     found = get_user_by_email("user@nexova.com")
     update_user(found["id"], role="manager")
     delete_user(found["id"])
+
+    # Restablecimiento de contraseña
+    token_rec = create_password_reset_token(user["id"], "hash_del_token", expires_at)
+    found_token = get_password_reset_token("hash_del_token")
+    mark_token_as_used("hash_del_token")
+    update_user_password(user["id"], "nuevo_hash_bcrypt")
 """
 
 import sys
@@ -66,6 +75,11 @@ def _users_table():
 def _profiles_table():
     """Atajo para obtener la tabla 'profiles'."""
     return _get_db().table("profiles")
+
+
+def _password_resets_table():
+    """Atajo para obtener la tabla 'password_resets'."""
+    return _get_db().table("password_resets")
 
 
 def _now_iso() -> str:
@@ -381,3 +395,101 @@ def delete_user(user_id: int) -> bool:
     # Eliminar usuario
     users.remove(doc_ids=[user_id])
     return True
+
+
+# ══════════════════════════════════════════════════════════════
+#  Operaciones para Password Reset
+# ══════════════════════════════════════════════════════════════
+
+
+def create_password_reset_token(
+    user_id: int,
+    token_hash: str,
+    expires_at: datetime,
+) -> dict[str, Any]:
+    """Crea un registro de token de restablecimiento de contraseña.
+
+    Args:
+        user_id:    ID del usuario que solicita el restablecimiento.
+        token_hash: Hash del token de restablecimiento.
+        expires_at: Fecha y hora de expiración del token.
+
+    Returns:
+        Diccionario con los datos del token creado.
+    """
+    table = _password_resets_table()
+    data: dict[str, Any] = {
+        "user_id": user_id,
+        "token_hash": token_hash,
+        "expires_at": expires_at.isoformat(),
+        "used": False,
+        "created_at": _now_iso(),
+    }
+    doc_id = table.insert(data)
+    return {**data, "id": doc_id}
+
+
+def get_password_reset_token(token_hash: str) -> Optional[dict[str, Any]]:
+    """Obtiene un token de restablecimiento por su hash.
+
+    Args:
+        token_hash: Hash del token a buscar.
+
+    Returns:
+        Diccionario con los datos del token, o ``None`` si no existe.
+    """
+    Reset = Query()
+    doc = _password_resets_table().get(Reset.token_hash == token_hash)
+    if doc is None:
+        return None
+    return {**doc, "id": doc.doc_id}
+
+
+def mark_token_as_used(token_hash: str) -> bool:
+    """Marca un token de restablecimiento como usado.
+
+    Args:
+        token_hash: Hash del token a marcar.
+
+    Returns:
+        ``True`` si se actualizó correctamente, ``False`` si no existe.
+    """
+    Reset = Query()
+    table = _password_resets_table()
+    doc = table.get(Reset.token_hash == token_hash)
+    if doc is None:
+        return False
+    table.update({"used": True}, Reset.token_hash == token_hash)
+    return True
+
+
+def update_user_password(
+    user_id: int,
+    new_hashed_password: str,
+) -> Optional[dict[str, Any]]:
+    """Actualiza la contraseña de un usuario y registra el cambio.
+
+    Además de actualizar ``hashed_password``, registra
+    ``password_changed_at`` con la fecha/hora actual para
+    poder invalidar tokens emitidos antes de ese momento.
+
+    Args:
+        user_id:             ID del usuario.
+        new_hashed_password: Nueva contraseña ya hasheada.
+
+    Returns:
+        El usuario actualizado, o ``None`` si no existe.
+    """
+    users = _users_table()
+    existing = users.get(doc_id=user_id)
+    if existing is None:
+        return None
+
+    users.update(
+        {
+            "hashed_password": new_hashed_password,
+            "password_changed_at": _now_iso(),
+        },
+        doc_ids=[user_id],
+    )
+    return get_user_by_id(user_id)
