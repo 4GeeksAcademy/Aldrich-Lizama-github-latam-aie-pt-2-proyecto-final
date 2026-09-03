@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { API_BASE_URL } from "@/lib/api";
+import { setAuthToken } from "@/lib/auth";
 
 type LoginResponse = {
   access_token: string;
@@ -41,8 +42,10 @@ export default function LoginPage() {
       }
 
       const data = (await res.json()) as LoginResponse;
-      // En próximos pasos este token se persiste (localStorage/httponly).
-      console.debug("Login OK – token recibido", data.token_type);
+
+      // Persiste el token JWT para las peticiones autenticadas
+      // (por ejemplo /account/change-password).
+      setAuthToken(data.access_token);
 
       // Redirige a la home tras un login exitoso.
       router.push("/");
