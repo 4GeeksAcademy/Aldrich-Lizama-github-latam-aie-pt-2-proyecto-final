@@ -1,0 +1,58 @@
+{
+  "profiles": {
+    "2": {
+      "address": "Calle Test 123, Madrid",
+      "name": "Test User Auth01",
+      "phone": "+34 999 888 777",
+      "user_id": 2
+    },
+    "3": {
+      "address": null,
+      "name": "Other User",
+      "phone": null,
+      "user_id": 3
+    },
+    "4": {
+      "address": null,
+      "name": "Admin User",
+      "phone": null,
+      "user_id": 5
+    },
+    "5": {
+      "address": null,
+      "name": "Regression Test",
+      "phone": "+34 600 000 000",
+      "user_id": 6
+    }
+  },
+  "users": {
+    "2": {
+      "created_at": "2026-09-03T19:01:35.556949+00:00",
+      "email": "test_auth01@nexova.com",
+      "hashed_password": "$2b$12$hux76.lexJbRCv9u1BS//.ENuXIHg6XttcWV/FgVQTQlpj1AR2czS",
+      "is_active": true,
+      "role": "user"
+    },
+    "3": {
+      "created_at": "2026-09-03T19:01:35.862935+00:00",
+      "email": "other_user@nexova.com",
+      "hashed_password": "$2b$12$P/i6aNN0MFpLwjs7YJFU7u3SXvcd.Ju/IM/VAryhRAn.I4tqkueDK",
+      "is_active": true,
+      "role": "user"
+    },
+    "5": {
+      "created_at": "2026-09-03T19:01:37.896002+00:00",
+      "email": "admin_auth01@nexova.com",
+      "hashed_password": "$2b$12$yAAu/OILx08IW.3oHmqsT.ari0oT9uuaQgpmL/UyOVS0TojRWd7sy",
+      "is_active": true,
+      "role": "admin"
+    },
+    "6": {
+      "created_at": "2026-09-03T19:01:38.305632+00:00",
+      "email": "regression_test@nexova.com",
+      "hashed_password": "$2b$12$E.udVSyxLftXtQyeu0HofufwiD5RCDWMUFBCFhXE5N5rhTwtUCrim",
+      "is_active": true,
+      "role": "user"
+    }
+  }
+}

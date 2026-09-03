@@ -15,8 +15,9 @@ Endpoints:
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.api.deps import get_current_user
 from services.api.database import get_suppliers_table
 from services.api.models import (
     SupplierCreate,
@@ -80,7 +81,7 @@ async def create_supplier(payload: SupplierCreate):
 # ══════════════════════════════════════════════════════════
 
 
-@router.get("", response_model=list[SupplierResponse])
+@router.get("", response_model=list[SupplierResponse], dependencies=[Depends(get_current_user)])
 async def list_suppliers(
     country: Optional[str] = Query(None, description="Filtrar por país: Spain / USA"),
     category: Optional[str] = Query(
@@ -126,7 +127,7 @@ async def list_suppliers(
 # ══════════════════════════════════════════════════════════
 
 
-@router.get("/{supplier_id}", response_model=SupplierResponse)
+@router.get("/{supplier_id}", response_model=SupplierResponse, dependencies=[Depends(get_current_user)])
 async def get_supplier(supplier_id: int):
     """Retorna el detalle del proveedor por ID.
 
@@ -142,7 +143,7 @@ async def get_supplier(supplier_id: int):
 # ══════════════════════════════════════════════════════════
 
 
-@router.patch("/{supplier_id}/rate", response_model=SupplierResponse)
+@router.patch("/{supplier_id}/rate", response_model=SupplierResponse, dependencies=[Depends(get_current_user)])
 async def update_supplier_rate(supplier_id: int, payload: SupplierRateUpdate):
     """Actualiza la tarifa mensual de un proveedor.
 
@@ -164,7 +165,7 @@ async def update_supplier_rate(supplier_id: int, payload: SupplierRateUpdate):
 # ══════════════════════════════════════════════════════════
 
 
-@router.patch("/{supplier_id}/status", response_model=SupplierResponse)
+@router.patch("/{supplier_id}/status", response_model=SupplierResponse, dependencies=[Depends(get_current_user)])
 async def update_supplier_status(supplier_id: int, payload: SupplierStatusUpdate):
     """Activa o suspende un proveedor.
 
@@ -183,7 +184,7 @@ async def update_supplier_status(supplier_id: int, payload: SupplierStatusUpdate
 # ══════════════════════════════════════════════════════════
 
 
-@router.delete("/{supplier_id}", response_model=SupplierResponse)
+@router.delete("/{supplier_id}", response_model=SupplierResponse, dependencies=[Depends(get_current_user)])
 async def delete_supplier(supplier_id: int):
     """Deshabilita un proveedor (soft-delete).
 

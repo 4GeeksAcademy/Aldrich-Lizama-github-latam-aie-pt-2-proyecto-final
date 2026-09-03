@@ -1,0 +1,1 @@
+# app/core/ — Capa transversal de seguridad, config y utilidades compartidas.

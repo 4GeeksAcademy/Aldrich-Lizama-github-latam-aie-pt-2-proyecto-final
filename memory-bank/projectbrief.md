@@ -47,7 +47,7 @@ Construir una **plataforma AI-ready**, por hitos, que reduzca trabajo manual y h
 | **Hito 1 — Sitio Web Público** | `CONTEXT-nexova.es (1).md` | ✅ Implementado (HTML + Next.js) |
 | **Hito 2 — Fundamentos de Programación** | `CONTEXT-nexova.es (2).md` | ✅ Implementado (TypeScript) |
 | **Hito 3 — Talent Pipeline Tracker** | `CONTEXT-nexova.es (3).md` | ✅ Implementado (Next.js SPA) |
-| **Hito 5 — Gestión de Inventario Backend** | `CONTEXT-nexova.es (5).md` | ❌ Pendiente |
+| **Hito 5 — Gestión de Inventario Backend** | `CONTEXT-nexova.es (5).md` | 🟡 En progreso — API con almacenamiento ligero (TinyDB) y CRUD de proveedores completado. Pendiente: inventario con Asset/AssetEntry/AssetExit |
 | **Hito 6 — Telemetría + Data Pipeline** | `CONTEXT-nexova.es (6)/` | ❌ Pendiente |
 | **Hito 7 — RAG y Base de Conocimiento** | `CONTEXT-nexova.es (7)/` | ❌ Pendiente |
 | **Hito 8 — Memoria y Aseguramiento de Agentes** | `CONTEXT-nexova.es (8)/` | ❌ Pendiente |

@@ -1,0 +1,1 @@
+# app/schemas/ — Schemas Pydantic para autenticación, usuarios y módulos de negocio.

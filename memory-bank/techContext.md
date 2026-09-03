@@ -51,6 +51,27 @@ Archivos heredados (HTML vanilla, mantenidos por compatibilidad):
 - Componentes: `CsvUploader`, `MetricsCards`, `BreakdownTable`, `SatisfactionIndex`, `InvalidRecordsAlert`, `ExportButton`
 - Comunicación con backend FastAPI en `services/server.py`
 
+#### Directorio de Proveedores (`/suppliers`) — NUEVO
+- Página completa (~960 líneas) en `src/app/suppliers/page.tsx`
+- Tipos en `src/app/suppliers/types.ts` (Supplier, CreateSupplier, SupplierFormData)
+- API client en `src/app/suppliers/api.ts`
+- **Lucide React** para toda la iconografía (Plus, X, CheckCircle, XCircle, AlertTriangle, DollarSign, Trash2, EyeOff, Eye, Search, RefreshCw, Globe, Calendar, Clock, Building2, MapPin, Tag, Filter, Loader2)
+- Summary bar con 4 KPI cards (total, activos, suspendidos, tarifa promedio)
+- Tabla responsive con acciones horizontales (icon-only)
+- Modal de confirmación de eliminación (soft-delete) con animación (`modalIn`)
+- Modal de creación/edición de proveedores
+- Modal de actualización de tarifa
+- Filtros por país y categoría
+- Diseño responsive: `.wrapper--wide` (1280px), `.hide-mobile` para columnas en mobile
+
+#### Diseño global del backoffice — mejorado (2026-09)
+- **impeccable.style CLI v3.6.0** instalado como devDependency (0 anti-patterns ✅)
+- **CSS Design System** en `globals.css` con tokens: `--bg: #0f1b24`, `--card: #142735`, `--text: #ecf2ef`, `--accent: #7ec0a7`, etc.
+- Clases base: `.btn`, `.btn--primary`, `.btn--danger`, `.btn--ghost`
+- `color-scheme: dark` en `:root` + estilos explícitos para `select`/`option` (corrige dropdowns grises)
+- `prefers-reduced-motion` para animaciones accesibles
+- `DESIGN.md` con reglas personalizadas para impeccable
+
 ### Talent Pipeline Tracker — `uis/talent-pipeline-tracker/`
 
 - **Next.js 16** (App Router) + **React 19**
@@ -61,11 +82,52 @@ Archivos heredados (HTML vanilla, mantenidos por compatibilidad):
 - **SSE** para actualización en tiempo real
 - Dependencia de API externa (`playground.4geeks.com`)
 
-### Backend de Análisis — `services/server.py`
+### Backend de Análisis y Proveedores — `services/server.py`
 
-- **FastAPI** con endpoint `POST /api/incidents/analyze` y `GET /api/incidents/results/export`
-- CORS habilitado para frontend
+- **FastAPI** con endpoints `POST /api/incidents/analyze` y `GET /api/incidents/results/export`
+- CORS habilitado para frontend (wildcard en desarrollo)
 - Utiliza el paquete `nexova_analyzer` para toda la lógica de análisis
+- **Incluye router de proveedores** (`services/api/routes/suppliers.py`) montado en `app.include_router()`
+- Título: "Nexova API — Incidencias y Proveedores" v1.1.0
+
+### Módulo de Proveedores — `services/api/`
+
+API RESTful para directorio de proveedores con almacenamiento ligero:
+
+| Archivo | Propósito |
+|---|---|
+| `database.py` | Singleton TinyDB 4.9.0 — `get_suppliers_table()` con carga lazy |
+| `models.py` | Modelos Pydantic v2: `SupplierCreate`, `SupplierResponse`, `SupplierRateUpdate`, `SupplierStatusUpdate`. Validators: `field_validator` y `model_validator` |
+| `router.py` | APIRouter con prefijo `/api/suppliers`. CRUD completo + soft-delete |
+| `routes/suppliers.py` | Router integrado en server.py con soft-delete (`deleted_at` + `status="suspended"`) |
+| `seed.py` | 15 proveedores de ejemplo precargados en `db.json` |
+| `main.py` | Entrypoint directo para `uvicorn services.api.main:app --reload` |
+
+**Endpoints:**
+
+| Método | Ruta | Función |
+|--------|------|---------|
+| GET | `/api/suppliers` | Listar con filtros opcionales `?country=`, `?category=` |
+| GET | `/api/suppliers/{id}` | Obtener detalle por doc_id numérico |
+| POST | `/api/suppliers` | Crear nuevo proveedor (status_code 201) |
+| PUT | `/api/suppliers/{id}/rate` | Actualizar `monthly_rate` + `updated_at` |
+| PUT | `/api/suppliers/{id}/status` | Activar/suspender (`"active"` / `"suspended"`) |
+| DELETE | `/api/suppliers/{id}` | Soft-delete: setea `deleted_at = now_iso()` y `status = "suspended"` |
+
+**Modelo Supplier:**
+```python
+class SupplierBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+    contacto: str = Field(..., min_length=1, max_length=120)
+    country: str  # VALID_COUNTRIES = ["Spain", "USA"]
+    categories: list[str]  # min 1, max 3, desde VALID_CATEGORIES
+    monthly_rate: float = Field(..., gt=0, le=100_000)
+    currency: str  # derivado del país (EUR/USD)
+    status: str = "active"  # VALID_STATUSES = ["active", "suspended"]
+    deleted_at: str | None = None
+```
+
+**TinyDB**: Base de datos JSON ligera, sin servidor. Documentos accesibles vía `.doc_id` (API v4). Persiste en `services/api/db.json`. Seed data se carga al iniciar si la tabla está vacía.
 
 ### Paquete reutilizable — `packages/nexova_analyzer/`
 
@@ -101,6 +163,19 @@ interface AnalysisResult {
 - Flags: `--as-json`, `--export [FILE]`, `--no-interactive`
 - Dataset de ejemplo: `scripts/incidents-nexova.csv`
 
+### Skill project-map — `skills/project-map/`
+
+Skill de IA que contiene el mapa completo del proyecto:
+- Todos los directorios, puertos, rutas y servicios
+- URLs de previsualización dinámicas (`$CODESPACE_NAME-{PORT}.app.github.dev`)
+- Auto-update del estado de puertos en cada invocación
+- Comandos rápidos para iniciar servicios y builds
+
+Archivos:
+- `skills/project-map/SKILL.md` (316 líneas) — mapa completo
+- `skills/project-map/README.md` — descripción en inglés
+- `skills/project-map/README.es.md` — descripción en español
+
 ### Utilidades TypeScript del monorepo — `src/`
 
 | Archivo | Contenido |
@@ -118,7 +193,19 @@ interface AnalysisResult {
 - `package.json` root con scripts `typecheck` y `demo`
 - `tsconfig.json` root con strict mode, `noUnusedLocals`/`noUnusedParameters`, target ES2022
 - `packages/shared/package.json` con `@repo/shared-types`
+- `.gitignore` (nuevo) — excluye `node_modules/`, `.next/`, `__pycache__/`, `*.tsbuildinfo`, `*.db.json`
+- `pyproject.toml` (nuevo) — configuración del proyecto Python
 - Cada UI tiene su propio `package.json`, `tsconfig.json`, `eslint.config.mjs`, `next.config.ts`
+- `server.py` (raíz) — Flask legacy en puerto 3001, sirve HTML estáticos (index.html, application.html, playground.html)
+
+### Servicios en ejecución (puertos activos)
+
+| Puerto | Servicio | URL |
+|--------|----------|-----|
+| 3000 | Backoffice (Next.js) | `https://$CODESPACE_NAME-3000.app.github.dev` |
+| 3001 | Website (Next.js) o Flask (HTML) | `https://$CODESPACE_NAME-3001.app.github.dev` |
+| 3002 | Talent Pipeline Tracker (Next.js) | `https://$CODESPACE_NAME-3002.app.github.dev` |
+| 8000 | FastAPI Backend (Incidencias + Proveedores) | `https://$CODESPACE_NAME-8000.app.github.dev` |
 
 ## 2) Decisiones de diseño técnico y restricciones
 
@@ -200,3 +287,47 @@ interface AnalysisResult {
   - consumo en uis,
   - evaluación y datasets en data,
   - automatización operativa en workflows/skills/agents.
+
+### Convenciones de seguridad (AUTH-01)
+
+- **Hash de contraseñas**: `passlib.hash.bcrypt` (bcrypt v4.x compatible con passlib 1.7.4).
+- **JWT**: `python-jose[cryptography]` con algoritmo HS256.
+- **Variables de entorno**: `SECRET_KEY`, `ALGORITHM`, `ACCESS_TOKEN_EXPIRE_MINUTES` cargadas con `python-dotenv`.
+- **Email validation**: `EmailStr` de Pydantic v2 con `email-validator` 2.3.0.
+- **Persistencia de usuarios**: TinyDB en `app/services/tinydb_storage.json` con tablas separadas `users` y `profiles`.
+- **Contraseñas**: Nunca almacenadas en texto plano; se hashean antes de persistir.
+- **Autenticación**: `OAuth2PasswordBearer(tokenUrl="/auth/login")` extrae token del header `Authorization: Bearer <token>`.
+- **Dependencia protegida**: `get_current_user(token) -> dict` decodifica JWT, extrae `sub` (user_id), busca en BD y verifica `is_active`.
+- **Manejo de errores 401**: Token inválido, expirado, usuario inexistente o desactivado → `HTTPException(401)` con `WWW-Authenticate: Bearer`.
+
+### Entrypoint central — `app/main.py` (AUTH-01 integración)
+
+Se creó `app/main.py` como entrypoint central de la API que integra **todos los routers**:
+
+```python
+from app.api.auth import router as auth_router          # /auth
+from app.api.users import router as users_router         # /users
+from app.api.profiles import router as profiles_router   # /profiles
+from services.api.routes.suppliers import router as suppliers_router  # /suppliers
+
+app.include_router(auth_router)
+app.include_router(users_router)
+app.include_router(profiles_router)
+app.include_router(suppliers_router)
+```
+
+Uso: `uvicorn app.main:app --reload` o `python3 -m app.main`
+
+**Rutas protegidas con JWT en suppliers (5 rutas):**
+
+Se aplicó `dependencies=[Depends(get_current_user)]` en `services/api/routes/suppliers.py`:
+
+| Ruta | Método | Protegida |
+|------|--------|-----------|
+| `/suppliers` | GET | ✅ `dependencies=[Depends(get_current_user)]` |
+| `/suppliers/{supplier_id}` | GET | ✅ |
+| `/suppliers/{supplier_id}/rate` | PATCH | ✅ |
+| `/suppliers/{supplier_id}/status` | PATCH | ✅ |
+| `/suppliers/{supplier_id}` | DELETE | ✅ |
+
+La dependencia se importa desde `app.api.deps` y todas las respuestas 401 incluyen `WWW-Authenticate: Bearer`.
