@@ -1,7 +1,9 @@
 # Progress — Nexova AI Engineering Project
 
-> **Branch activo:** `API_con_Almacenamiento_Ligero` (creada desde `backend`)
-> **Último commit:** `2e8e929` — "feat: implementar API con almacenamiento ligero (TinyDB) y soft-delete de proveedores"
+> **Branch activo:** `Restablecimiento_de_Contraseña` (rama de trabajo actual — AUTH-03)
+> **Último commit (rama activa):** `c3b08b6` — "test(auth): pruebas pytest para flujo AUTH-03 de contraseña" — head de `Restablecimiento_de_Contraseña` (ya pusheado a origin, árbol limpio)
+> **Último commit (main):** `2e8e929` — "feat: implementar API con almacenamiento ligero (TinyDB) y soft-delete de proveedores"
+> **Rama AUTH-03:** `Restablecimiento_de_Contraseña` — contiene 4 commits: `29027fa` (backend), `16e948f` (frontend recovery), `3782b83` (change-password), `c3b08b6` (tests)
 > **PR activo:** Ninguno
 > **Fecha de actualización:** 2026-09-03
 
@@ -180,6 +182,67 @@ Implementado en dos versiones:
 - Perfil opcional: solo se crea si se provee `name`
 - Eliminación en cascada: `delete_user` también borra el perfil
 
+### ✅ AUTH-02 — Autenticación JWT y Protección de Rutas (completado · rama `Autenticación_yRestricción`)
+
+> Rama: `Autenticación_yRestricción` · commit `07caf97` — "feat(auth): implementar autenticación JWT, restricción de rutas y protección de endpoints de proveedores"
+
+- **App FastAPI central**: `app/main.py` monta routers `/auth`, `/users`, `/profiles`, `/suppliers`; lifespan siembra proveedores; CORS abierto en dev.
+- **Login**: `POST /auth/login` (OAuth2 form) valida user/password/is_active → devuelve `{access_token, token_type}`.
+- **Protección**: `get_current_user` (OAuth2PasswordBearer) protege 5 rutas de proveedores y las de users/profiles. 401 con header `WWW-Authenticate: Bearer`.
+- **Registro público**: `POST /users/` (sin auth) — crea usuario + perfil opcional.
+- **Credenciales por defecto**: se siembran usuarios de prueba al arrancar (o en la BD dev existente).
+- **79 tests** de backend (AUTH-01 + AUTH-02) pasan ✅.
+
+### ✅ AUTH-03 — Recuperación y Cambio de Contraseña (completado · rama `Restablecimiento_de_Contraseña`)
+
+> Rama: `Restablecimiento_de_Contraseña` · 4 commits pusheados · consumo completo (backend → frontend → tests).
+
+#### Backend (commit `29027fa`)
+
+| Endpoint | Método | Auth | Descripción |
+|---|---|---|---|
+| `/auth/forgot-password` | POST | ❌ | Email válido → genera token aleatorio (secreto 32), persiste hash en tabla `password_resets`, envía email best-effort (Resend). **Siempre responde 200** (anti-enumeración) |
+| `/auth/reset-password` | POST | ❌ | Token → cambia password. Errores 400: token inválido / ya utilizado / expirado |
+| `/auth/change-password` | POST | ✅ JWT | Verifica `current_password` → 400 "La contraseña actual no es correcta" |
+
+- **Tabla `password_resets`** en TinyDB: columnas `id`, `user_id`, `token_hash`, `expires_at`, `used_at`, `used`.
+- **Expiración**: `expires_at = now + 30 min` (**HARDCODED** — no leído de env; ver nota en pendientes).
+- `app/core/email.py`: `send_reset_password_email()` vía Resend API — requiere `EMAIL_SERVICE_API_KEY` (mejor-esfuerzo; sin key no causa error de contrato, siempre 200).
+- `.env.example`: variables documentadas `RESET_TOKEN_EXPIRE_MINUTES=30`, `EMAIL_SERVICE_API_KEY`, `EMAIL_FROM`, `FRONTEND_URL`.
+
+#### Frontend (commits `16e948f` + `3782b83`)
+
+| Archivo | Descripción |
+|---|---|
+| `uis/website/src/app/login/page.tsx` | Login con JWT; guarda token (`setAuthToken`) y redirige a `/`; link "¿Olvidaste tu contraseña?" |
+| `uis/website/src/app/forgot-password/page.tsx` | Formulario email → `POST /auth/forgot-password`; success card genérica "Revisa tu correo..." |
+| `uis/website/src/app/reset-password/page.tsx` | Lee `?token=` (useSearchParams + Suspense); valida ≥8 + igualdad; 400 → "El enlace de restablecimiento es inválido o ha expirado" |
+| `uis/website/src/app/account/change-password/page.tsx` | Formulario autenticado (JWT en header): actual, nueva, confirmar; validación client-side (≥8 + coincidencia), 400 → feedback, 200 → "Tu contraseña ha sido actualizada correctamente." |
+| `uis/website/src/lib/auth.ts` | `setAuthToken`/`getAuthToken`/`clearAuthToken`, `isAuthenticated`, `authHeaders()`, evento `nexova:auth-changed` |
+| `uis/website/src/lib/api.ts` | `API_BASE_URL` con detección de Codespaces + fallback localhost:8000 |
+
+- **Patrón de sesión**: token guardado en `localStorage` (`nexova_access_token`), evento `nexova:auth-changed` para re-render reactivo (usado con `useSyncExternalStore` en change-password).
+- Change-password 401 → limpia token y muestra "Tu sesión ha expirado".
+
+#### Tests (commit `c3b08b6`) — `tests/test_password_reset.py`
+
+Suite pytest con `TestClient` (FastAPI), **6 tests** — 6/6 ✅:
+
+| Test | Cubre |
+|---|---|
+| `test_forgot_password_always_returns_200` | anti-enumeración (email existente y no) |
+| `test_reset_password_success_flow` | login con nueva password 200, anterior 401 |
+| `test_reset_password_token_reuse_fails` | token de un solo uso → 400 "utilizado" |
+| `test_reset_password_expired_token_fails` | token expirado → 400 "expirado" |
+| `test_change_password_validations` | current incorrecta 400, correcta 200, restaura password inicial |
+| `test_unauthorized_access` | sin JWT → 401 + `WWW-Authenticate: Bearer` |
+
+- **Aislamiento BD**: monkeypatch de `app.services.db_service._DB_PATH` + `_db_instance=None` a archivo temporal ANTES de importar la app (nunca toca la BD dev).
+- **Fixture**: `client = TestClient(app)` SIN context manager (evita lifespan seed de suppliers).
+- Ejecución: `python3 -m pytest tests/test_password_reset.py -v`.
+
+**Estado:** ✅ Todo commiteado y pusheado; árbol limpio; sin cambios pendientes al cierre de sesión.
+
 ### ✅ Gobernanza de Agentes — AGENTS.md (creado y actualizado)
 
 `AGENTS.md` con:
@@ -239,11 +302,17 @@ Todos los documentos de contexto de los hitos del curso están presentes:
 | Testing de regresión (formulario, API tracker, análisis, proveedores) | 🔴 Pendiente | Alta |
 | Migrar `<img>` a `next/image` en website (warning ESLint) | 🟡 Sin empezar | Media |
 
+### Mejoras ofrecidas pero NO implementadas (pendientes de aprobación)
+
+| Mejora | Detalle | Estado |
+|---|---|---|
+| Leer `RESET_TOKEN_EXPIRE_MINUTES` desde env | `app/api/auth.py` hardcodea 30 min en `forgot-password` (línea ~177). `.env.example` documenta `RESET_TOKEN_EXPIRE_MINUTES=30`. Hacerlo configurable como `ACCESS_TOKEN_EXPIRE_MINUTES` (patrón en `app/core/security.py`). Se podría acompañar con test de expiración ya existente | 🟡 Propuesta — NO aprobada. El usuario cerró sesión: "vejáramos de trabajar por ahora" |
+
 ### Hitos del curso NO INICIADOS
 
 | Hito | Contexto | Estado |
 |---|---|---|
-| **Hito 5** — Gestión de Inventario Backend | `CONTEXT-nexova.es (5).md` | ❌ No iniciado |
+| **Hito 5** — Gestión de Inventario Backend | `CONTEXT-nexova.es (5).md` | 🟡 En progreso (CRUD proveedores listo; inventario Asset/AssetEntry/AssetExit pendiente) |
 | **Hito 6** — Telemetría + Data Pipeline | `CONTEXT-nexova.es (6)/` | ❌ No iniciado |
 | **Hito 7** — RAG y Base de Conocimiento | `CONTEXT-nexova.es (7)/` | ❌ No iniciado (documentos fuente listos) |
 | **Hito 8** — Memoria y Aseguramiento de Agentes | `CONTEXT-nexova.es (8)/` | ❌ No iniciado |
@@ -261,6 +330,7 @@ Todos los documentos de contexto de los hitos del curso están presentes:
 - **Talent Pipeline Tracker**: build previo ✅ OK
 - **Lint**: website y backoffice sin errores bloqueantes ✅
 - **Servicios**: FastAPI arranca en puerto 8000 ✅ | Backoffice Next.js en puerto 3000 ✅
+- **AUTH-03 pytest**: `python3 -m pytest tests/test_password_reset.py -v` → **6 passed** ✅ (2026-09-03)
 
 ---
 
