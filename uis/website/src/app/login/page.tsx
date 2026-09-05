@@ -47,8 +47,8 @@ export default function LoginPage() {
       // (por ejemplo /account/change-password).
       setAuthToken(data.access_token);
 
-      // Redirige a la home tras un login exitoso.
-      router.push("/");
+      // Redirige al perfil personal tras un login exitoso.
+      router.push("/account/profile");
       router.refresh();
     } catch {
       setError("No se pudo conectar con el servidor. Inténtalo de nuevo.");
@@ -115,6 +115,22 @@ export default function LoginPage() {
             style={{ color: "var(--brand-hover)", fontWeight: 600 }}
           >
             ¿Olvidaste tu contraseña?
+          </Link>
+        </p>
+
+        <p
+          style={{
+            margin: 0,
+            fontSize: "0.95rem",
+            textAlign: "center",
+          }}
+        >
+          ¿No tienes cuenta?{" "}
+          <Link
+            href="/register"
+            style={{ color: "var(--brand-hover)", fontWeight: 600 }}
+          >
+            Regístrate aquí
           </Link>
         </p>
       </form>

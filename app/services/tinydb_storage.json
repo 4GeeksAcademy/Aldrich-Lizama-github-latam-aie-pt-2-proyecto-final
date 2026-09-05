@@ -1,4 +1,29 @@
 {
+  "application_cards": {
+    "1": {
+      "address": "Madrid",
+      "availability": "Inmediata",
+      "education": "Ing. Inform\u00e1tica",
+      "experience": "5 a\u00f1os en desarrollo web",
+      "full_name": "Test User",
+      "linkedin": "https://linkedin.com/in/test",
+      "phone": "+34 600 123 456",
+      "portfolio": "",
+      "skills": "Python, JS, React",
+      "user_id": 9
+    }
+  },
+  "applications": {
+    "1": {
+      "applied_at": "2026-09-05T02:08:14.360822+00:00",
+      "company_name": "TechCorp",
+      "job_title": "Desarrollador Full Stack",
+      "location": "Remoto",
+      "notes": null,
+      "status": "pending",
+      "user_id": 9
+    }
+  },
   "password_resets": {},
   "profiles": {
     "2": {
@@ -24,6 +49,12 @@
       "name": "Regression Test",
       "phone": "+34 600 000 000",
       "user_id": 6
+    },
+    "6": {
+      "address": null,
+      "name": "uldraich",
+      "phone": "+56 964718832",
+      "user_id": 8
     }
   },
   "users": {
@@ -52,6 +83,27 @@
       "created_at": "2026-09-03T20:26:58.633916+00:00",
       "email": "regression_test@nexova.com",
       "hashed_password": "$2b$12$a4Ni751gO3j0YfE3gA3vse6knoTr8DqkiBVWdp1dFiEpaC2FfEB4S",
+      "is_active": true,
+      "role": "user"
+    },
+    "7": {
+      "created_at": "2026-09-05T01:47:48.333885+00:00",
+      "email": "test@prueba.com",
+      "hashed_password": "$2b$12$8jXlieN13ZhWjdpyPWgC3.WGC7JZQsymwM5ZH.ROUKnf9D7aG74x6",
+      "is_active": true,
+      "role": "user"
+    },
+    "8": {
+      "created_at": "2026-09-05T01:48:51.783025+00:00",
+      "email": "quipaza123@gmail.com",
+      "hashed_password": "$2b$12$puO7uAy.d7lcEDjfVKVWVOpHCXeqxzsBFP7ZYjaOgblr3zgRWOkkG",
+      "is_active": true,
+      "role": "user"
+    },
+    "9": {
+      "created_at": "2026-09-05T02:04:30.381118+00:00",
+      "email": "test-apps@prueba.com",
+      "hashed_password": "$2b$12$AGyaDfthBQ/kiMYsZqVXE.xtwb//lRWJmRiAIMwP5QqWc6ONhAS.G",
       "is_active": true,
       "role": "user"
     }
