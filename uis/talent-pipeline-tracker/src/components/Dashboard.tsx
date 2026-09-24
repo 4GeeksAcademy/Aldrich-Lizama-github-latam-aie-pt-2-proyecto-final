@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useRecords, useRecordDetail, useCreateRecord } from "@/hooks/useRecords";
 import { deleteRecord } from "@/lib/api";
-import { STATUS_LABELS, STAGE_LABELS } from "@/types";
+import type { RecordCreate, RecordOut } from "@/types";
 import StatCard from "./StatCard";
 import FilterBar from "./FilterBar";
 import RecordsTable from "./RecordsTable";
@@ -34,7 +34,7 @@ export default function Dashboard() {
   const creator = useCreateRecord();
 
   const [showForm, setShowForm] = useState(false);
-  const [editRecord, setEditRecord] = useState<any>(null);
+  const [editRecord, setEditRecord] = useState<RecordOut | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   // Stats — calculadas sobre allRecords (sin filtros) para reflejar valores reales
@@ -68,7 +68,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: RecordCreate) => {
     const result = await creator.create(data);
     if (result) {
       setShowForm(false);
@@ -76,7 +76,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleEditSave = async (data: any) => {
+  const handleEditSave = async (data: RecordCreate) => {
     if (!editRecord) return;
     const updated = await detail.updateRecordFields(data);
     if (updated) {

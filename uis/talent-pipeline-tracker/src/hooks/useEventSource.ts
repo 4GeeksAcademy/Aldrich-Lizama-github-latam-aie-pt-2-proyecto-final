@@ -6,7 +6,12 @@
 
 import { useEffect, useRef, useCallback } from "react";
 
-type EventHandler = (data: any) => void;
+type EventPayload = {
+  data?: unknown;
+  error?: string;
+};
+
+type EventHandler = (data: EventPayload) => void;
 
 interface UseEventSourceOptions {
   /** Parámetros de filtro para la URL del SSE */
@@ -34,12 +39,9 @@ export function useEventSource({
   const onErrorRef = useRef(onError);
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const connectRef = useRef<() => void>(() => {});
   const retryCountRef = useRef(0);
   const maxRetries = 5;
-
-  // Mantener refs actualizados sin causar re-renders
-  onRecordsRef.current = onRecords;
-  onErrorRef.current = onError;
 
   const connect = useCallback(() => {
     if (!enabled) return;
@@ -62,7 +64,7 @@ export function useEventSource({
 
     es.addEventListener("records", (event) => {
       try {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data) as EventPayload;
         onRecordsRef.current?.(data);
         retryCountRef.current = 0;
       } catch (err) {
@@ -85,13 +87,19 @@ export function useEventSource({
       }
 
       const delay = Math.min(1000 * Math.pow(2, retryCountRef.current), 30_000);
-      reconnectTimeoutRef.current = setTimeout(connect, delay);
+      reconnectTimeoutRef.current = setTimeout(() => connectRef.current(), delay);
     });
 
     es.onopen = () => {
       retryCountRef.current = 0;
     };
   }, [search, status, stage, enabled]); // Solo filtros, no callbacks
+
+  useEffect(() => {
+    onRecordsRef.current = onRecords;
+    onErrorRef.current = onError;
+    connectRef.current = connect;
+  }, [connect, onError, onRecords]);
 
   useEffect(() => {
     connect();

@@ -81,7 +81,8 @@ assert verify_password("superpass123", user["hashed_password"])
 assert "created_at" in user
 assert "id" in user
 assert "profile" in user
-assert user["profile"] is None
+assert user["profile"] is not None
+assert user["profile"]["name"] == ""
 print("✅ create_user (basic) OK")
 
 user2 = create_user(

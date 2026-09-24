@@ -25,11 +25,26 @@ from passlib.hash import bcrypt
 # ── Cargar variables de entorno ─────────────────────────
 load_dotenv()
 
-SECRET_KEY: str = os.getenv("SECRET_KEY", "changeme-default-insecure-key")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY es obligatoria. Defínela en el archivo .env antes de iniciar la API."
+    )
+
 ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
-)
+_access_token_expire_minutes = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+if not _access_token_expire_minutes:
+    raise RuntimeError(
+        "ACCESS_TOKEN_EXPIRE_MINUTES es obligatoria. Defínela en el archivo .env antes de iniciar la API."
+    )
+
+try:
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(_access_token_expire_minutes)
+except ValueError as exc:
+    raise RuntimeError("ACCESS_TOKEN_EXPIRE_MINUTES debe ser un entero positivo.") from exc
+
+if ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
+    raise RuntimeError("ACCESS_TOKEN_EXPIRE_MINUTES debe ser un entero positivo.")
 
 
 # ══════════════════════════════════════════════════════════

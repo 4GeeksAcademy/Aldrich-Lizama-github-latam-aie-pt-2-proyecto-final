@@ -29,10 +29,17 @@ _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
-# ── Variables de entorno para el test ───────────────────
-os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"] = "60"
-if "SECRET_KEY" not in os.environ:
-    os.environ["SECRET_KEY"] = "test-secret-key-validate-auth01-2026"
+# ── Requerir configuración antes de importar la aplicación ─
+required_environment = ("SECRET_KEY", "ACCESS_TOKEN_EXPIRE_MINUTES")
+missing_environment = [
+    name for name in required_environment if not os.environ.get(name)
+]
+if missing_environment:
+    raise SystemExit(
+        "Faltan variables de entorno obligatorias: "
+        + ", ".join(missing_environment)
+        + ". Configúralas en .env antes de ejecutar esta validación."
+    )
 
 from app.main import app
 from app.core.security import (
@@ -284,7 +291,7 @@ async def run_all_validations():
     )
     admin_id = admin_user["id"]
 
-    # Verificamos la lógica de autorización
+    # Los tokens se usarán para comprobar respuestas HTTP reales.
     current_admin = get_current_user(
         create_access_token(data={
             "sub": str(admin_id),
@@ -301,21 +308,8 @@ async def run_all_validations():
         })
     )
 
-    # Simular lógica de PUT /users/{id}: usuario no-admin intenta modificar a otro
-    is_owner = current_user_obj["id"] == user_id
-    is_admin = current_user_obj["role"] == "admin"
-    should_403 = not is_owner and not is_admin
-    check("user no-admin NO es owner de otro user", is_owner is False)
-    check("user no-admin NO es admin", is_admin is False)
-    check("user no-admin → 403 al modificar otro usuario", should_403 is True)
-
-    # Admin modifica a otro usuario
-    is_owner_admin = current_admin["id"] == user2_id
-    is_admin_admin = current_admin["role"] == "admin"
-    check("admin NO es owner de otro user (pero es admin)", is_owner_admin is False)
-    check("admin tiene role=admin (desde BD)", is_admin_admin is True,
+    check("admin tiene role=admin (desde BD)", current_admin["role"] == "admin",
           f"Role: {current_admin['role']}")
-    check("admin → puede modificar (no 403)", not is_owner_admin and is_admin_admin)
 
     # ════════════════════════════════════════════════════════════
     #  9. Variables de entorno (expiración y clave)
@@ -327,7 +321,7 @@ async def run_all_validations():
     import app.core.security as sec
 
     check("SECRET_KEY viene de env (no default inseguro)",
-          sec.SECRET_KEY != "changeme-default-insecure-key")
+          sec.SECRET_KEY == os.environ["SECRET_KEY"])
     check("ALGORITHM = HS256", sec.ALGORITHM == "HS256")
     check("ACCESS_TOKEN_EXPIRE_MINUTES = 60",
           sec.ACCESS_TOKEN_EXPIRE_MINUTES == 60)
@@ -435,7 +429,6 @@ async def run_all_validations():
             # Probar todas las rutas protegidas con token
             protected_with_token = [
                 ("GET", "/auth/me"),
-                ("GET", "/users/"),
                 ("GET", "/profiles/me"),
                 ("GET", "/suppliers"),
             ]
@@ -450,6 +443,42 @@ async def run_all_validations():
 
             check("Todas las rutas protegidas funcionan con token",
                   all_ok, "Alguna ruta falló con token válido")
+
+            # Autorización real de /users: no-admin recibe 403 y admin sí accede.
+            regr_user = get_user_by_email(regr_email)
+            admin_headers = {
+                "Authorization": f"Bearer {create_access_token(data={'sub': str(admin_id)})}"
+            }
+            other_user_headers = {
+                "Authorization": f"Bearer {create_access_token(data={'sub': str(user2_id)})}"
+            }
+            list_as_user = await client.get("/users/", headers=headers)
+            list_as_admin = await client.get("/users/", headers=admin_headers)
+            check("GET /users/ → 403 para usuario normal",
+                list_as_user.status_code == 403,
+                f"Status: {list_as_user.status_code}")
+            check("GET /users/ → 200 para admin",
+                list_as_admin.status_code == 200,
+                f"Status: {list_as_admin.status_code}")
+
+            own_detail = await client.get(
+                f"/users/{regr_user['id']}", headers=headers
+            )
+            other_detail = await client.get(
+                f"/users/{user2_id}", headers=headers
+            )
+            admin_detail = await client.get(
+                f"/users/{user2_id}", headers=admin_headers
+            )
+            check("GET /users/{id} → 200 para el propietario",
+                own_detail.status_code == 200,
+                f"Status: {own_detail.status_code}")
+            check("GET /users/{id} → 403 para otro usuario",
+                other_detail.status_code == 403,
+                f"Status: {other_detail.status_code}")
+            check("GET /users/{id} → 200 para admin",
+                admin_detail.status_code == 200,
+                f"Status: {admin_detail.status_code}")
 
         # ════════════════════════════════════════════════════════════
         #  13. TinyDB storage

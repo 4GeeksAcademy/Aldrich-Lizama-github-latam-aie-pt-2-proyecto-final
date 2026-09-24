@@ -49,7 +49,7 @@ export default function BreakdownTable({
           </tr>
         </thead>
         <tbody>
-          {entries.map(([key, count], idx) => {
+          {entries.map(([key, count]) => {
             const pct = denominator > 0 ? (count / denominator) * 100 : 0;
             return (
               <tr

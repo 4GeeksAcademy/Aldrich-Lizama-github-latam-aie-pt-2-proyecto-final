@@ -137,6 +137,12 @@ async def list_users(
     Returns:
         Lista de usuarios (sin ``hashed_password``).
     """
+    if current_user["role"] != RoleEnum.ADMIN.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los administradores pueden listar usuarios",
+        )
+
     users = get_all_users()
     return [_serialize_user(u) for u in users]
 
@@ -165,6 +171,14 @@ async def get_user(
     Raises:
         HTTPException 404: Si el usuario no existe.
     """
+    is_owner = current_user["id"] == user_id
+    is_admin = current_user["role"] == RoleEnum.ADMIN.value
+    if not is_owner and not is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permiso para consultar este usuario",
+        )
+
     user = get_user_by_id(user_id)
     if user is None:
         raise HTTPException(

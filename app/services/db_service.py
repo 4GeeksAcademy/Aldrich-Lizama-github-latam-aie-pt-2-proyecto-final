@@ -227,15 +227,13 @@ def create_user(
     # ── 3. Insertar usuario ──
     user_doc_id = users.insert(user_data)
 
-    # ── 4. Crear perfil asociado (solo si se provee name) ──
-    profile: Any = None
-    if name is not None:
-        profile = create_profile(
-            user_id=user_doc_id,
-            name=name,
-            phone=phone,
-            address=address,
-        )
+    # ── 4. Crear siempre el perfil asociado ──
+    profile = create_profile(
+        user_id=user_doc_id,
+        name=name or "",
+        phone=phone,
+        address=address,
+    )
 
     return {
         "id": user_doc_id,

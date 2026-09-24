@@ -1,7 +1,17 @@
 # Progress — Nexova AI Engineering Project
 
-> **Branch activo:** `API_con_Almacenamiento_Ligero` (creada desde `backend`)
-> **Último commit:** `2e8e929` — "feat: implementar API con almacenamiento ligero (TinyDB) y soft-delete de proveedores"
+## Corrección AUTH-02 — 2026-09-24
+
+- Rama: `Autenticación_yRestricción`.
+- `SECRET_KEY` y `ACCESS_TOKEN_EXPIRE_MINUTES` ahora son obligatorias desde el entorno, sin valores fallback inseguros.
+- `GET /users/` quedó restringido a administradores; `GET /users/{id}` permite propietario o administrador.
+- La validación AUTH-01 ejecuta solicitudes HTTP reales para comprobar respuestas `403`.
+- Cada usuario crea siempre un perfil asociado en TinyDB.
+- Validación funcional: `scripts/validate_auth01.py` pasó 78/78 comprobaciones; pytest, TypeScript y linters de las UIs pasan.
+- Riesgo pendiente: `uis/website/src/components/Hero.tsx` conserva un warning de ESLint por usar `<img>`; no bloquea el commit.
+
+> **Branch activo:** `Autenticación_yRestricción`
+> **Último commit:** `07caf97` — "feat(auth): implementar autenticación JWT, restricción de rutas y protección de endpoints de proveedores"
 > **PR activo:** Ninguno
 > **Fecha de actualización:** 2026-09-03
 

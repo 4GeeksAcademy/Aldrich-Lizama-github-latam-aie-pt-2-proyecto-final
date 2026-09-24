@@ -1,14 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { RecordOut, RecordCreate, StatusValue, StageValue } from "@/types";
+import type {
+  RecordOut,
+  RecordCreate,
+  StatusValue,
+  StageValue,
+} from "@/types";
 import {
   getRecords,
   getRecordById,
   createRecord,
   updateRecord,
   updateRecordData,
-  deleteRecord,
   getNotes,
   addNote,
   deleteNote,
@@ -79,8 +83,10 @@ export function useRecords() {
 
   // Fetch inicial
   useEffect(() => {
-    fetchRecords();
-    fetchAllRecords();
+    const fetchInitialData = async () => {
+      await Promise.all([fetchRecords(), fetchAllRecords()]);
+    };
+    void fetchInitialData();
   }, [fetchRecords, fetchAllRecords]);
 
   // SSE en tiempo real — usa valores debounced para evitar reconexiones en cada tecleo
@@ -89,7 +95,7 @@ export function useRecords() {
     status: debouncedStatus,
     stage: debouncedStage,
     onRecords: (data) => {
-      const incoming = data.data ?? [];
+      const incoming = Array.isArray(data.data) ? (data.data as RecordOut[]) : [];
       setRecords(incoming);
       setPage(1);
       // Si no hay filtros activos, el SSE ya trae todos los registros → actualizamos allRecords
@@ -139,10 +145,20 @@ export function useRecords() {
     setPage(newPage);
   }, []);
 
-  // Resetear a página 1 cuando cambian los filtros
-  useEffect(() => {
+  const updateSearch = useCallback((value: string) => {
     setPage(1);
-  }, [search, statusFilter, stageFilter]);
+    setSearch(value);
+  }, []);
+
+  const updateStatusFilter = useCallback((value: string) => {
+    setPage(1);
+    setStatusFilter(value);
+  }, []);
+
+  const updateStageFilter = useCallback((value: string) => {
+    setPage(1);
+    setStageFilter(value);
+  }, []);
 
   return {
     records: paginatedRecords,
@@ -153,11 +169,11 @@ export function useRecords() {
     totalPages,
     totalRecords: records.length,
     search,
-    setSearch,
+    setSearch: updateSearch,
     statusFilter,
-    setStatusFilter,
+    setStatusFilter: updateStatusFilter,
     stageFilter,
-    setStageFilter,
+    setStageFilter: updateStageFilter,
     onPageChange: handlePageChange,
     refresh,
   };
@@ -213,7 +229,7 @@ export function useRecordDetail() {
     async (status: string) => {
       if (!record) return;
       try {
-        const updated = await updateRecord(record.id, { status: status as any });
+        const updated = await updateRecord(record.id, { status: status as StatusValue });
         setRecord(updated);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al actualizar");
@@ -226,7 +242,7 @@ export function useRecordDetail() {
     async (stage: string) => {
       if (!record) return;
       try {
-        const updated = await updateRecord(record.id, { stage: stage as any });
+        const updated = await updateRecord(record.id, { stage: stage as StageValue });
         setRecord(updated);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al actualizar");

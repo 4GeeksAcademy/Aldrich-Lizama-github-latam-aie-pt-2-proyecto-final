@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
             lastData = raw;
             controller.enqueue(encoder.encode(`event: records\ndata: ${raw}\n\n`));
           }
-        } catch (err) {
+        } catch {
           const errorMsg = JSON.stringify({ error: "Connection error" });
           controller.enqueue(encoder.encode(`event: error\ndata: ${errorMsg}\n\n`));
         }

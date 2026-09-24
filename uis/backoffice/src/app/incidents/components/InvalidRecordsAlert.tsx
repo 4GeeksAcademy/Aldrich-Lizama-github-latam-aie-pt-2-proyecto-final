@@ -74,7 +74,7 @@ export default function InvalidRecordsAlert({ data }: Props) {
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry, idx) => (
+          {entries.map((entry) => (
             <tr
               key={entry.rule}
               style={{

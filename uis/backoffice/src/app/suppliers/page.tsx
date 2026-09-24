@@ -8,9 +8,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Plus, X, CheckCircle, XCircle, AlertTriangle,
-  DollarSign, Trash2, EyeOff, Eye, Search,
-  RefreshCw, Globe, Calendar, Clock, Building2,
-  MapPin, Tag, Filter, Loader2,
+  DollarSign, Trash2, EyeOff, Eye,
+  RefreshCw, Globe, Building2, Filter, Loader2,
 } from "lucide-react";
 import type {
   Supplier,
@@ -100,7 +99,10 @@ export default function SuppliersPage() {
   }, [filterCountry, filterCategory]);
 
   useEffect(() => {
-    loadSuppliers();
+    const timer = window.setTimeout(() => {
+      void loadSuppliers();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [loadSuppliers]);
 
   // ── Crear proveedor ────────────────────────────────────
@@ -986,14 +988,6 @@ function RateForm({
     </form>
   );
 }
-
-// ══════════════════════════════════════════════════════════
-//  Estilos inline (siguiendo convenciones del proyecto)
-// ══════════════════════════════════════════════════════════
-
-const tableStyle: React.CSSProperties = {
-  fontSize: "0.85rem",
-};
 
 const thStyle: React.CSSProperties = {
   padding: "0.75rem 0.5rem",
