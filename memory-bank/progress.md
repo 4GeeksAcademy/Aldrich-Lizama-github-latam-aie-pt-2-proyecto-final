@@ -1,5 +1,17 @@
 # Progress — Nexova AI Engineering Project
 
+## AUTH-02 Frontend — 2026-09-28
+
+- Rama de trabajo: `Autenticación_en_el_Frontend`.
+- Backoffice y Talent Pipeline Tracker cuentan con registro, login, perfil y guard en sus layouts; el website público no monta autenticación.
+- Corregida la carga bloqueada tras un `401` de `/auth/me` y protegida la sesión nueva frente a respuestas tardías de una sesión anterior.
+- Proveedores del backoffice usa el cliente autenticado; este adjunta el bearer token, limpia la sesión y redirige en `401`, y rechaza orígenes ajenos a la API Nexova.
+- Incidencias y la API externa del tracker son servicios distintos; no reciben el JWT de Nexova ni invalidan esa sesión ante errores propios.
+- Playwright y Chromium instalados fuera del repositorio; una prueba en navegador detectó que los formularios podían enviarse como GET antes de hidratar, exponiendo credenciales en la URL. Login y registro de ambas apps esperan hidratación y usan POST como respaldo.
+- Verificación pre-commit: TypeScript en raíz y UIs, ESLint de las tres UIs sin errores, Prettier en los archivos AUTH-02, suite Python y builds de las dos apps privadas. Recorrido Chromium repetido tras el formateo con API/TinyDB temporal: redirección sin sesión, registro/login, lectura y edición persistente de perfil, logout y token inválido. Se comprobó además `401` de proveedores y acceso público al website.
+- Deuda pendiente: **los diseños de login, registro y perfil no se han unificado entre las aplicaciones**. Siguiente paso: acordar componentes y estilo compartidos y consolidar la batería E2E en una suite persistente.
+- Riesgos restantes: warning preexistente de múltiples lockfiles en el build del tracker y warning de `<img>` en website. `dist/` es salida generada y queda fuera del commit.
+
 ## Corrección AUTH-02 — 2026-09-24
 
 - Rama: `Autenticación_yRestricción`.
@@ -10,10 +22,10 @@
 - Validación funcional: `scripts/validate_auth01.py` pasó 78/78 comprobaciones; pytest, TypeScript y linters de las UIs pasan.
 - Riesgo pendiente: `uis/website/src/components/Hero.tsx` conserva un warning de ESLint por usar `<img>`; no bloquea el commit.
 
-> **Branch activo:** `Autenticación_yRestricción`
-> **Último commit:** `07caf97` — "feat(auth): implementar autenticación JWT, restricción de rutas y protección de endpoints de proveedores"
+> **Branch activo:** `Autenticación_en_el_Frontend`
+> **Último commit previo a AUTH-02 frontend:** `2521096` — "fix(auth): require security env and enforce user authorization"
 > **PR activo:** Ninguno
-> **Fecha de actualización:** 2026-09-03
+> **Fecha de actualización:** 2026-09-28
 
 ---
 

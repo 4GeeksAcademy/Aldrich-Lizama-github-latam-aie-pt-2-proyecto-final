@@ -16,46 +16,10 @@ import type {
   RateUpdatePayload,
   StatusUpdatePayload,
 } from "./types";
+import { apiClient } from "@/lib/apiClient";
 
-/**
- * Determina la URL base del backend automáticamente.
- *
- * - En Codespaces (app.github.dev), deduce la URL pública del puerto 8000.
- * - En local, usa NEXT_PUBLIC_API_URL o http://localhost:8000 por defecto.
- */
-function getBaseUrl(): string {
-  // Si el usuario configuró explícitamente la variable, usarla
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-
-  // Detectar Codespaces por el hostname
-  if (typeof window !== "undefined") {
-    const host = window.location.hostname;
-    // Ejemplo: super-duper-space-tribble-xrwx94wrxvvphvwq6-3000.app.github.dev
-    if (host.endsWith(".app.github.dev")) {
-      // Reemplazar el puerto 3000 por 8000
-      // El hostname: "{codespace-name}-{port}.app.github.dev"
-      // Extraemos la parte antes del último '-' que precede al puerto
-      const lastDash = host.lastIndexOf("-");
-      const dotIndex = host.indexOf(".");
-      if (lastDash > 0 && dotIndex > lastDash) {
-        const baseName = host.slice(0, lastDash); // todo antes del puerto
-        return `https://${baseName}-8000.app.github.dev`;
-      }
-    }
-  }
-
-  return "http://localhost:8000";
-}
-
-const BASE_URL = getBaseUrl();
-
-async function request<T>(
-  path: string,
-  options?: RequestInit,
-): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await apiClient(path, {
     headers: { "Content-Type": "application/json", ...options?.headers },
     ...options,
   });
@@ -70,7 +34,9 @@ async function request<T>(
       body?.detail ??
       (typeof body === "object" ? JSON.stringify(body) : body) ??
       res.statusText;
-    throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+    throw new Error(
+      typeof detail === "string" ? detail : JSON.stringify(detail),
+    );
   }
 
   return body as T;

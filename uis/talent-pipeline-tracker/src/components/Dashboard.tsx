@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRecords, useRecordDetail, useCreateRecord } from "@/hooks/useRecords";
+import {
+  useRecords,
+  useRecordDetail,
+  useCreateRecord,
+} from "@/hooks/useRecords";
 import { deleteRecord } from "@/lib/api";
+import { STATUS_LABELS } from "@/types";
 import type { RecordCreate, RecordOut } from "@/types";
 import StatCard from "./StatCard";
 import FilterBar from "./FilterBar";
@@ -95,14 +100,17 @@ export default function Dashboard() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-extrabold tracking-tight">Talent Pipeline Tracker</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              Talent Pipeline Tracker
+            </h1>
             <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               En vivo
             </span>
           </div>
           <p className="text-sm text-nexova-muted mt-1">
-            Gestión de candidaturas — Nexova · Actualización en tiempo real vía SSE
+            Gestión de candidaturas — Nexova · Actualización en tiempo real vía
+            SSE
           </p>
         </div>
         <button
@@ -116,10 +124,26 @@ export default function Dashboard() {
       {/* Stats */}
       <div className="mb-6 grid grid-cols-2 sm:grid-cols-5 gap-3">
         <StatCard icon="📋" value={stats.total} label="Total candidatos" />
-        <StatCard icon="📥" value={stats.received} label={STATUS_LABELS.received} />
-        <StatCard icon="🔄" value={stats.inProgress} label={STATUS_LABELS.in_progress} />
-        <StatCard icon="✅" value={stats.selected} label={STATUS_LABELS.selected} />
-        <StatCard icon="❌" value={stats.discarded} label={STATUS_LABELS.discarded} />
+        <StatCard
+          icon="📥"
+          value={stats.received}
+          label={STATUS_LABELS.received}
+        />
+        <StatCard
+          icon="🔄"
+          value={stats.inProgress}
+          label={STATUS_LABELS.in_progress}
+        />
+        <StatCard
+          icon="✅"
+          value={stats.selected}
+          label={STATUS_LABELS.selected}
+        />
+        <StatCard
+          icon="❌"
+          value={stats.discarded}
+          label={STATUS_LABELS.discarded}
+        />
       </div>
 
       {/* Filters */}
