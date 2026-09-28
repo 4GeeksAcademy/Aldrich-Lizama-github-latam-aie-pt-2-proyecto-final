@@ -1,5 +1,23 @@
 # Progress — Nexova AI Engineering Project
 
+## Gestor de Incidencias — Modelo inicial — 2026-09-28
+
+- Rama activa: `Gestor_de_Incidencias`.
+- Definido `Incident` en `services/api/models.py`: UUID automático; título/descripción obligatorios; ocho categorías y cuatro sedes exactas del CONTEXT del Gestor de Incidencias; estados `open`, `in_progress`, `resolved`, `discarded`; orígenes `customer`, `branch`, `internal`; `branch` obligatorio y `central` para casos sin sede específica.
+- `created_at` y `updated_at` se generan en UTC; las asignaciones validadas a campos editables renuevan automáticamente `updated_at`.
+- Añadido `services/api/seed_incidents.py`: valida filas con `nexova_analyzer`, mapea CSV a modelo, usa UUID determinista derivado de `ticket_id` (o `title + created_at` como fallback), no persiste el ticket id y reporta inválidas sin imprimir valores sensibles.
+- El seed transforma el CSV real en 96 incidencias válidas y descarta 4; los agregados coinciden con el contexto. Su segunda ejecución omite las 96 como duplicados.
+- Pruebas `services/api/test_seed_incidents.py`: 2 pasaron; también se probaron las 8 categorías × 4 sedes, validación de campos, enums en asignación, timestamps UTC y serialización.
+- Añadido `services/api/routes/incidents.py` con POST/list/detail, filtros, transiciones PATCH y métricas; se monta en `services/api/main.py` y `services/server.py`.
+- Validaciones API en 400 con campo/mensaje; 404 para registros ausentes; lecturas vacías retornan defaults vacíos/cero; errores inesperados responden 500 genérico sin exponer detalles internos.
+- Pruebas `services/api/test_incident_routes.py`: 10 pasaron; en total, seed + endpoints: 12 pruebas pasaron. OpenAPI y smoke tests en ambos entrypoints confirman las rutas.
+- Backoffice: añadido el Gestor de Incidencias en `/incident-manager` y enlazado desde el menú; incluye formulario, filtros, tabla, resumen independiente y rollback optimista de estado.
+- Verificado en Chromium con API/TinyDB temporal: registro desde origen branch y sede resaltada, filtros/empty state, fallo y reintento del listado, fallo aislado del resumen, error de campo sanitizado, PATCH fallido con rollback y PATCH correcto.
+- Validación UI final: typecheck, ESLint, Prettier y build de Backoffice pasan.
+- Corrección aplicada: `packages/shared/incident_validation.py` centraliza campos obligatorios y valores permitidos; la reutilizan el router API y el seed. Los textos compuestos solo por espacios devuelven 400 con campo identificado, en vez de 500.
+- Validación corregida: suite de incidencias y seed pasa 14/14; typecheck, ESLint y build de Backoffice pasan.
+- Siguiente paso: conectar el frontend con datos no temporales y revisar autorización/roles requeridos por negocio.
+
 ## AUTH-02 Frontend — 2026-09-28
 
 - Rama de trabajo: `Autenticación_en_el_Frontend`.

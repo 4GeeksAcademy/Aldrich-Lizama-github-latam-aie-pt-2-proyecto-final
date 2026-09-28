@@ -43,7 +43,9 @@ _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 from services.api.routes.suppliers import router as suppliers_router
+from services.api.routes.incidents import router as incidents_router
 from services.api.seed import seed_suppliers
+from services.api.errors import unhandled_exception_handler
 
 # ── Lifespan handler (startup / shutdown) ────────────────
 from contextlib import asynccontextmanager
@@ -66,6 +68,7 @@ app = FastAPI(
     version="1.1.0",
     lifespan=lifespan,
 )
+app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # ── CORS: permitir que el frontend (Next.js) se comunique ──
 app.add_middleware(
@@ -78,6 +81,7 @@ app.add_middleware(
 
 # ── Incluir routers ─────────────────────────────────────
 app.include_router(suppliers_router)
+app.include_router(incidents_router)
 
 
 # ══════════════════════════════════════════════════════════

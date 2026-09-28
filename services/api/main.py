@@ -27,6 +27,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from services.api.errors import unhandled_exception_handler
+from services.api.routes.incidents import router as incidents_router
 from services.api.routes.suppliers import router as suppliers_router
 from services.api.seed import seed_suppliers
 
@@ -58,6 +60,7 @@ app = FastAPI(
     version="1.1.0",
     lifespan=lifespan,
 )
+app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # ── CORS: permitir que el frontend (Next.js backoffice) se comunique ──
 app.add_middleware(
@@ -70,6 +73,7 @@ app.add_middleware(
 
 # ── Incluir rutas de suppliers ──────────────────────────
 app.include_router(suppliers_router)
+app.include_router(incidents_router)
 
 
 # ══════════════════════════════════════════════════════════

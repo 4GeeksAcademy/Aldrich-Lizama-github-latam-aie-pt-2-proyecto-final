@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-models.py — Nexova Suppliers Directory · Pydantic schemas
-==========================================================
-Define los modelos de datos para el directorio de proveedores:
+models.py — Nexova API · Pydantic models
+========================================
+Define los modelos de datos para incidencias y proveedores:
+- Incident
   - SupplierCreate (registro nuevo)
   - SupplierRateUpdate (actualización de tarifa)
   - SupplierStatusUpdate (activar/suspender)
@@ -10,9 +11,92 @@ Define los modelos de datos para el directorio de proveedores:
 """
 
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Optional
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class IncidentStatus(str, Enum):
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    DISCARDED = "discarded"
+
+
+class IncidentOrigin(str, Enum):
+    CUSTOMER = "customer"
+    BRANCH = "branch"
+    INTERNAL = "internal"
+
+
+class IncidentCategory(str, Enum):
+    TECHNICAL_FAILURE = "technical_failure"
+    PROCESS_ERROR = "process_error"
+    CLIENT_COMPLAINT = "client_complaint"
+    CANDIDATE_ISSUE = "candidate_issue"
+    STAFF_ISSUE = "staff_issue"
+    SLA_BREACH = "sla_breach"
+    DATA_QUALITY = "data_quality"
+    OTHER = "other"
+
+
+class IncidentBranch(str, Enum):
+    CENTRAL = "central"
+    VALENCIA_OPERATIONS = "valencia_operations"
+    MIAMI_OFFICE = "miami_office"
+    REMOTE = "remote"
+
+
+class Incident(BaseModel):
+    """Incidencia gestionada por el equipo de soporte de Nexova."""
+
+    model_config = ConfigDict(validate_assignment=True)
+
+    id: UUID = Field(default_factory=uuid4, description="Identificador único")
+    title: str = Field(..., min_length=1, description="Título breve de la incidencia")
+    description: str = Field(..., min_length=1, description="Descripción detallada")
+    category: IncidentCategory
+    status: IncidentStatus = IncidentStatus.OPEN
+    origin: IncidentOrigin
+    branch: IncidentBranch = Field(
+        ...,
+        description=(
+            "Sede: central, valencia_operations, miami_office o remote. "
+            "Usar central si no aplica una sede específica."
+        ),
+    )
+    created_at: datetime = Field(default_factory=_utc_now)
+    updated_at: datetime = Field(default_factory=_utc_now)
+
+    @field_validator("title")
+    @classmethod
+    def strip_title(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("El título no puede estar vacío")
+        return normalized
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("La descripción no puede estar vacía")
+        return value
+
+    def __setattr__(self, name: str, value: object) -> None:
+        super().__setattr__(name, value)
+        if (
+            name in type(self).model_fields
+            and name not in {"id", "created_at", "updated_at"}
+            and "updated_at" in self.__dict__
+        ):
+            super().__setattr__("updated_at", _utc_now())
 
 # ══════════════════════════════════════════════════════════
 #  Constantes del dominio
