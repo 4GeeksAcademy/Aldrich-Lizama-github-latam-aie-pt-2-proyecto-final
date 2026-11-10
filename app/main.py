@@ -32,6 +32,9 @@ from app.api.auth import router as auth_router
 from app.api.users import router as users_router
 from app.api.profiles import router as profiles_router
 
+# ── Router de postulaciones y fichas ───────────────────
+from app.api.applications import router as applications_router
+
 # ── Router de proveedores (Suppliers Directory) ─────────
 from services.api.routes.suppliers import router as suppliers_router
 from services.api.seed import seed_suppliers
@@ -76,6 +79,7 @@ app.add_middleware(
 app.include_router(auth_router)      # /auth
 app.include_router(users_router)     # /users
 app.include_router(profiles_router)  # /profiles
+app.include_router(applications_router)  # /applications
 app.include_router(suppliers_router) # /suppliers
 
 
