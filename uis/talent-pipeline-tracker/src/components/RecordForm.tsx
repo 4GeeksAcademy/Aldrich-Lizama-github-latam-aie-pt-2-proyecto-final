@@ -31,6 +31,7 @@ export default function RecordForm({ record, onSubmit, onCancel }: RecordFormPro
   });
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -52,16 +53,22 @@ export default function RecordForm({ record, onSubmit, onCancel }: RecordFormPro
     if (Object.keys(errs).length > 0) return;
 
     setSaving(true);
-    await onSubmit({
-      full_name: form.full_name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      position: form.position.trim(),
-      experience_years: form.experience_years,
-      linkedin_url: form.linkedin_url.trim() || null,
-      cv_url: form.cv_url.trim() || null,
-    });
-    setSaving(false);
+    setApiError(null);
+    try {
+      await onSubmit({
+        full_name: form.full_name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        position: form.position.trim(),
+        experience_years: form.experience_years,
+        linkedin_url: form.linkedin_url.trim() || null,
+        cv_url: form.cv_url.trim() || null,
+      });
+    } catch (err: unknown) {
+      setApiError(err instanceof Error ? err.message : "Error al guardar el candidato. Inténtalo de nuevo.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const set = (field: string, value: string | number) => {
@@ -204,6 +211,15 @@ export default function RecordForm({ record, onSubmit, onCancel }: RecordFormPro
               className="mt-1 w-full rounded-md border border-nexova-border bg-white/60 px-3 py-2 text-sm shadow-sm focus:border-nexova-hover focus:outline-none focus:ring-2 focus:ring-nexova-accent"
             />
           </div>
+
+          {apiError && (
+            <div role="alert" style={{ color: "#b42318", margin: 0 }}>
+              <p style={{ margin: 0 }}>{apiError}</p>
+              <button className="btn btn-link" onClick={() => setApiError(null)} style={{ marginTop: "0.3rem", padding: 0, border: "none", background: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer" }}>
+                Reintentar
+              </button>
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <button

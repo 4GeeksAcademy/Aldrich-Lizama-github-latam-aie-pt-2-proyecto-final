@@ -76,8 +76,13 @@ export function useRecords() {
     try {
       const data = await getRecords();
       setAllRecords(data);
-    } catch {
-      // Silencioso — no mostrar error por stats
+    } catch (err) {
+      console.error("No se pudieron cargar las estadísticas completas", err);
+      // No sobreescribimos un error existente para no ocultar
+      // errores más relevantes del fetch con filtros
+      if (!error) {
+        setError("No se pudieron cargar las estadísticas completas.");
+      }
     }
   }, []);
 
@@ -103,7 +108,12 @@ export function useRecords() {
       if (!debouncedSearch && !debouncedStatus && !debouncedStage) {
         setAllRecords(incoming);
       } else {
-        getRecords().then(setAllRecords).catch(() => {});
+        getRecords().then(setAllRecords).catch((err) => {
+          console.error("No se pudieron cargar estadísticas completas tras SSE", err);
+          if (!error) {
+            setError("No se pudieron cargar las estadísticas completas.");
+          }
+        });
       }
       setError(null);
     },
@@ -165,6 +175,7 @@ export function useRecords() {
     allRecords,
     loading,
     error,
+    setError,
     page: safePage,
     totalPages,
     totalRecords: records.length,

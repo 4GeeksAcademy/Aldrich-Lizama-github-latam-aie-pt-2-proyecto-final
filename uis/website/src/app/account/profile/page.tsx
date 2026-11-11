@@ -104,6 +104,7 @@ export default function ProfilePage() {
     availability: "",
   });
   const [loadingCard, setLoadingCard] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
   const [cardSaving, setCardSaving] = useState(false);
   const [cardSaveSuccess, setCardSaveSuccess] = useState(false);
   const [cardSaveError, setCardSaveError] = useState<string | null>(null);
@@ -194,6 +195,7 @@ export default function ProfilePage() {
     let cancelled = false;
     const fetchCard = async () => {
       setLoadingCard(true);
+      setCardError(null);
       try {
         const res = await fetch(`${API_BASE_URL}/applications/card`, {
           headers: headers(),
@@ -202,9 +204,12 @@ export default function ProfilePage() {
         if (res.ok) {
           const data = (await res.json()) as ApplicationCard;
           if (!cancelled && data.id) setAppCard(data);
+        } else if (res.status !== 404) {
+          if (!cancelled) setCardError("Error al cargar tu ficha.");
         }
+        // 404 = aún no hay ficha, no es un error
       } catch {
-        // Silently fail
+        if (!cancelled) setCardError("No se pudo conectar con el servidor.");
       } finally {
         if (!cancelled) setLoadingCard(false);
       }
@@ -246,6 +251,7 @@ export default function ProfilePage() {
     e.preventDefault();
     if (savingApp) return;
     setSavingApp(true);
+    setAppsError(null);
     try {
       const res = await fetch(`${API_BASE_URL}/applications/`, {
         method: "POST",
@@ -268,8 +274,13 @@ export default function ProfilePage() {
         setNewLocation("");
         setNewStatus("pending");
         setNewNotes("");
+      } else {
+        const d = await res.json();
+        setAppsError(d.detail ?? "Error al crear la postulación.");
       }
-    } catch { /* ignore */ }
+    } catch {
+      setAppsError("No se pudo conectar con el servidor.");
+    }
     finally { setSavingApp(false); }
   };
 
@@ -439,7 +450,14 @@ export default function ProfilePage() {
           )}
 
           {loadingApps && <p style={{ color: "var(--muted)" }}>Cargando postulaciones…</p>}
-          {appsError && <p style={{ color: "crimson" }}>{appsError}</p>}
+          {appsError ? (
+            <div style={{ color: "crimson" }} role="alert">
+              <p style={{ margin: 0 }}>{appsError}</p>
+              <button className="btn btn-link" onClick={() => setAppsError(null)} style={{ marginTop: "0.3rem", padding: 0, border: "none", background: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer" }}>
+                Reintentar
+              </button>
+            </div>
+          ) : null}
           {!loadingApps && !appsError && applications.length === 0 && (
             <p style={{ color: "var(--muted)", textAlign: "center", padding: "1rem" }}>
               Aún no tienes postulaciones registradas.
@@ -488,6 +506,13 @@ export default function ProfilePage() {
           </p>
           {loadingCard ? (
             <p style={{ color: "var(--muted)" }}>Cargando ficha…</p>
+          ) : cardError ? (
+            <div className="card" style={{ padding: "1rem", textAlign: "center" }}>
+              <p style={{ color: "crimson" }}>{cardError}</p>
+              <button className="btn btn-primary" onClick={() => setTab("card")} style={{ marginTop: "0.5rem" }}>
+                Reintentar
+              </button>
+            </div>
           ) : (
             <form onSubmit={saveCard} className="card" style={{ padding: "1rem", display: "grid", gap: "0.8rem" }}>
               <div>

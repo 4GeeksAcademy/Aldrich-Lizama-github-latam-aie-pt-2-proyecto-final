@@ -6,16 +6,23 @@ Configura TinyDB con persistencia en un archivo JSON local.
 Exporta una función get_table() para acceder a la tabla 'suppliers'.
 """
 
+import logging
 import os
-import sys
 from pathlib import Path
+
+logger = logging.getLogger("nexova.db")
 
 # ── Asegurar que TinyDB es importable ─────────────────────
 try:
     from tinydb import TinyDB, Query
-except ImportError:
-    print("TinyDB no está instalado. Ejecutá: pip3 install tinydb")
-    sys.exit(1)
+except ImportError as _exc:
+    logger.critical(
+        "TinyDB no está instalado. Ejecutá: pip3 install tinydb"
+    )
+    raise RuntimeError(
+        "TinyDB es una dependencia obligatoria. "
+        "Ejecutá: pip3 install tinydb"
+    ) from _exc
 
 # ── Ruta del archivo JSON de persistencia ─────────────────
 _DB_DIR = Path(__file__).parent.resolve()

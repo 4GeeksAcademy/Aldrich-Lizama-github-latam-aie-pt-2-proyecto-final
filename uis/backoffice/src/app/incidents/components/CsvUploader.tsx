@@ -16,13 +16,15 @@ interface Props {
 export default function CsvUploader({ onFileSelected, disabled = false }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleFile = useCallback(
     (file: File) => {
       if (!file.name.toLowerCase().endsWith(".csv")) {
-        alert("Solo se permiten archivos CSV.");
+        setUploadError("Solo se permiten archivos CSV.");
         return;
       }
+      setUploadError(null);
       onFileSelected(file);
     },
     [onFileSelected],
@@ -130,6 +132,11 @@ export default function CsvUploader({ onFileSelected, disabled = false }: Props)
       <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--muted)" }}>
         Solo archivos <strong>.csv</strong> con formato incidents-COMPANY.csv
       </p>
+      {uploadError && (
+        <p role="alert" style={{ margin: "0.5rem 0 0", color: "#b42318", fontSize: "0.85rem" }}>
+          {uploadError}
+        </p>
+      )}
     </div>
   );
 }

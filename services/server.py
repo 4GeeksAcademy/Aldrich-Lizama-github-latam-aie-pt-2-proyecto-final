@@ -15,10 +15,12 @@ Uso:
 """
 
 import csv
-import sys
+import logging
 import os
 from io import StringIO
 from typing import Optional
+
+logger = logging.getLogger("nexova.server")
 
 # ── Asegurar que el paquete reutilizable es importable ────
 _PACKAGES_PATH = os.path.abspath(
@@ -32,9 +34,14 @@ try:
     from fastapi import FastAPI, File, UploadFile, HTTPException
     from fastapi.responses import PlainTextResponse, Response
     from fastapi.middleware.cors import CORSMiddleware
-except ImportError:
-    print("FastAPI no está instalado. Ejecutá: pip3 install fastapi uvicorn")
-    sys.exit(1)
+except ImportError as _exc:
+    logger.critical(
+        "FastAPI no está instalado. Ejecutá: pip3 install fastapi uvicorn"
+    )
+    raise RuntimeError(
+        "FastAPI es una dependencia obligatoria. "
+        "Ejecutá: pip3 install fastapi uvicorn"
+    ) from _exc
 
 from nexova_analyzer import analyze_rows, export_csv_string, format_report_text
 
@@ -140,10 +147,15 @@ async def analyze_incidents(file: UploadFile = File(...)):
     # Analizar
     try:
         stats = analyze_rows(rows, source_name=file.filename)
-    except Exception as e:
+    except Exception:
+        import logging
+        logging.getLogger("nexova.incidents").exception(
+            "Error interno al analizar incidencias (archivo=%s)",
+            file.filename,
+        )
         raise HTTPException(
             status_code=500,
-            detail=f"Error interno al analizar: {str(e)}",
+            detail="Error interno al analizar el archivo. Verificá que el CSV tenga el formato esperado.",
         )
 
     return stats.to_dict()

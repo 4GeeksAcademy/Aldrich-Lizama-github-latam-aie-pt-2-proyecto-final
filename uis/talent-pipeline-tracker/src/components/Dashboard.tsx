@@ -22,6 +22,7 @@ export default function Dashboard() {
     allRecords,
     loading,
     error,
+    setError,
     page,
     totalPages,
     totalRecords,
@@ -68,6 +69,7 @@ export default function Dashboard() {
       await refresh();
     } catch (err) {
       console.error("Error al eliminar:", err);
+      setError("No se pudo eliminar el candidato. Inténtalo de nuevo.");
     } finally {
       setDeleteConfirm(null);
     }
@@ -162,6 +164,11 @@ export default function Dashboard() {
       {error && (
         <div className="mb-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}
+          <div style={{ marginTop: "0.5rem" }}>
+            <button className="btn btn-sm btn-primary" onClick={() => refresh()}>
+              Reintentar
+            </button>
+          </div>
         </div>
       )}
 
@@ -169,6 +176,18 @@ export default function Dashboard() {
       {creator.error && (
         <div className="mb-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
           {creator.error}
+        </div>
+      )}
+
+      {/* Detail error */}
+      {detail.error && (
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+          <p style={{ margin: 0 }}>{detail.error}</p>
+          <div className="flex gap-2 mt-2">
+            <button className="btn btn-sm btn-primary" onClick={detail.close} style={{ fontSize: "0.8rem" }}>
+              Cerrar
+            </button>
+          </div>
         </div>
       )}
 

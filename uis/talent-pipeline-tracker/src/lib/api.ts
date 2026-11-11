@@ -15,7 +15,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`API error ${res.status}: ${body}`);
+    throw new Error(`Error del servidor (${res.status}). Intentalo de nuevo más tarde.`);
   }
 
   if (res.status === 204) return undefined as T;

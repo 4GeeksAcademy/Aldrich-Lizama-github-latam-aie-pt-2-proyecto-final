@@ -2,7 +2,7 @@ const form = document.getElementById("application-form");
 const globalError = document.getElementById("global-error");
 const globalSuccess = document.getElementById("global-success");
 
-const locale = document.documentElement.lang.toLowerCase().startsWith("en") ? "en" : "es";
+const locale = (document.documentElement?.lang?.toLowerCase().startsWith("en")) ? "en" : "es";
 
 const t = {
   es: {
@@ -108,7 +108,8 @@ function validateLinkedin(value) {
       return t.linkedin;
     }
     return "";
-  } catch {
+  } catch (_e) {
+    console.error("validateLinkedin: URL inválida", _e);
     return t.linkedin;
   }
 }

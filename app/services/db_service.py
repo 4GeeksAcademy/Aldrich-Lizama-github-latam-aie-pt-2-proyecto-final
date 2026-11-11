@@ -35,16 +35,23 @@ Uso:
     update_user_password(user["id"], "nuevo_hash_bcrypt")
 """
 
-import sys
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
+logger = logging.getLogger("nexova.db")
+
 try:
     from tinydb import TinyDB, Query
-except ImportError:
-    print("TinyDB no está instalado. Ejecutá: pip3 install tinydb")
-    sys.exit(1)
+except ImportError as _exc:
+    logger.critical(
+        "TinyDB no está instalado. Ejecutá: pip3 install tinydb"
+    )
+    raise RuntimeError(
+        "TinyDB es una dependencia obligatoria. "
+        "Ejecutá: pip3 install tinydb"
+    ) from _exc
 
 from app.core.security import hash_password
 from app.schemas.auth_user import RoleEnum
@@ -227,7 +234,7 @@ def create_user(
 
     # ── 1. Validar unicidad del email ──
     if users.get(User.email == email):
-        raise ValueError(f"El email '{email}' ya está registrado")
+        raise ValueError("El email ya está registrado")
 
     # ── 2. Preparar datos del usuario ──
     user_data: dict[str, Any] = {
@@ -350,9 +357,7 @@ def update_user(
         all_docs = users.all()
         for doc in all_docs:
             if doc.get("email") == email and doc.doc_id != user_id:
-                raise ValueError(
-                    f"El email '{email}' ya está registrado por otro usuario"
-                )
+                raise ValueError("El email ya está registrado por otro usuario")
         updates["email"] = email
 
     if password is not None:

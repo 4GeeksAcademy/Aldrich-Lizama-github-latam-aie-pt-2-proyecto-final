@@ -16,6 +16,7 @@ Uso:
     app.include_router(users_router)
 """
 
+import logging
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -108,10 +109,16 @@ async def register_user(
             phone=payload.phone,
             address=payload.address,
         )
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=str(e),
+            detail="El email ya está registrado",
+        )
+    except Exception:
+        logger.exception("Error inesperado al registrar usuario")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al registrar el usuario. Inténtalo de nuevo más tarde.",
         )
 
     return _serialize_user(user)
@@ -237,7 +244,7 @@ async def update_user_endpoint(
     """
     # ── Verificar permisos ───────────────────────────────
     is_owner = current_user["id"] == user_id
-    is_admin = current_user["role"] == "admin"
+    is_admin = current_user["role"] == RoleEnum.ADMIN.value
 
     if not is_owner and not is_admin:
         raise HTTPException(
@@ -267,10 +274,10 @@ async def update_user_endpoint(
             password=payload.password,
             role=payload.role,
         )
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=str(e),
+            detail="El email ya está registrado por otro usuario",
         )
 
     if updated is None:

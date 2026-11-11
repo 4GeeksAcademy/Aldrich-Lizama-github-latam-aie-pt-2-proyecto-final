@@ -107,30 +107,54 @@ export default function SuppliersPage() {
 
   // ── Crear proveedor ────────────────────────────────────
   const handleCreate = async (payload: SupplierCreatePayload) => {
-    await createSupplier(payload);
-    setShowCreateModal(false);
-    await loadSuppliers();
+    setError(null);
+    try {
+      await createSupplier(payload);
+      setShowCreateModal(false);
+      await loadSuppliers();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al crear proveedor";
+      setError(msg);
+    }
   };
 
   // ── Toggle status ──────────────────────────────────────
   const handleToggleStatus = async (supplier: Supplier) => {
-    const newStatus = supplier.status === "active" ? "suspended" : "active";
-    await updateSupplierStatus(supplier.id, { status: newStatus });
-    await loadSuppliers();
+    setError(null);
+    try {
+      const newStatus = supplier.status === "active" ? "suspended" : "active";
+      await updateSupplierStatus(supplier.id, { status: newStatus });
+      await loadSuppliers();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al cambiar estado";
+      setError(msg);
+    }
   };
 
   // ── Actualizar tarifa ───────────────────────────────────
   const handleUpdateRate = async (id: string, monthlyRate: number) => {
-    await updateSupplierRate(id, { monthly_rate: monthlyRate });
-    setRateModal(null);
-    await loadSuppliers();
+    setError(null);
+    try {
+      await updateSupplierRate(id, { monthly_rate: monthlyRate });
+      setRateModal(null);
+      await loadSuppliers();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al actualizar tarifa";
+      setError(msg);
+    }
   };
 
   // ── Eliminar (soft-delete) ─────────────────────────────
   const handleDelete = async (supplier: Supplier) => {
-    await deleteSupplier(supplier.id);
-    setConfirmDelete(null);
-    await loadSuppliers();
+    setError(null);
+    try {
+      await deleteSupplier(supplier.id);
+      setConfirmDelete(null);
+      await loadSuppliers();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al eliminar proveedor";
+      setError(msg);
+    }
   };
 
   // ── Render ──────────────────────────────────────────────
@@ -278,8 +302,12 @@ export default function SuppliersPage() {
             color: "#e74c3c",
             marginBottom: "1rem",
           }}
+          role="alert"
         >
-          {error}
+          <p style={{ margin: 0 }}>{error}</p>
+          <button className="btn btn-link" onClick={() => setError(null)} style={{ marginTop: "0.3rem", padding: 0, border: "none", background: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer" }}>
+            Reintentar
+          </button>
         </div>
       )}
 
@@ -347,7 +375,7 @@ export default function SuppliersPage() {
                     </td>
                     <td style={tdStyle}>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
-                        {supplier.categories.map((cat) => (
+                        {(supplier.categories ?? []).map((cat) => (
                           <span key={cat} style={badgeStyle}>
                             {CATEGORY_LABELS[cat] ?? cat}
                           </span>
@@ -355,7 +383,7 @@ export default function SuppliersPage() {
                       </div>
                     </td>
                     <td style={{ ...tdStyle, whiteSpace: "nowrap" }}>
-                      {formatCurrency(supplier.monthly_rate, supplier.currency)}
+                      {formatCurrency(supplier.monthly_rate, supplier.currency ?? "EUR")}
                     </td>
                     <td style={tdStyle}>
                       <span
@@ -419,13 +447,15 @@ export default function SuppliersPage() {
                       )}
                     </td>
                     <td className="hide-mobile" style={{ ...tdStyle, fontSize: "0.85rem", color: "var(--muted)" }}>
-                      {new Date(supplier.updated_at).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {supplier.updated_at
+                        ? new Date(supplier.updated_at).toLocaleDateString("es-ES", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "—"}
                     </td>
                     <td style={tdStyle}>
                       <div style={{ display: "flex", gap: "0.35rem", flexWrap: "nowrap" }}>
@@ -721,8 +751,12 @@ function CreateForm({
             marginBottom: "0.8rem",
             fontSize: "0.85rem",
           }}
+          role="alert"
         >
-          {apiError}
+          <p style={{ margin: 0 }}>{apiError}</p>
+          <button className="btn btn-link" onClick={() => setApiError(null)} style={{ marginTop: "0.3rem", padding: 0, border: "none", background: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer" }}>
+            Reintentar
+          </button>
         </div>
       )}
 
@@ -948,8 +982,12 @@ function RateForm({
             marginBottom: "0.8rem",
             fontSize: "0.85rem",
           }}
+          role="alert"
         >
-          {apiError}
+          <p style={{ margin: 0 }}>{apiError}</p>
+          <button className="btn btn-link" onClick={() => setApiError(null)} style={{ marginTop: "0.3rem", padding: 0, border: "none", background: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer" }}>
+            Reintentar
+          </button>
         </div>
       )}
 

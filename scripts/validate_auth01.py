@@ -20,9 +20,12 @@ Requisitos:
   13. Sin regresiones con token válido
 """
 
-import sys
+import logging
 import os
+import sys
 import json
+
+logger = logging.getLogger("nexova.scripts.validate_auth01")
 
 # ── Asegurar que el repo root está en sys.path ──────────
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -35,15 +38,16 @@ missing_environment = [
     name for name in required_environment if not os.environ.get(name)
 ]
 if missing_environment:
-    raise SystemExit(
-        "Faltan variables de entorno obligatorias: "
-        + ", ".join(missing_environment)
-        + ". Configúralas en .env antes de ejecutar esta validación."
+    logger.error(
+        "Faltan variables de entorno obligatorias: %s. "
+        "Configúralas en .env antes de ejecutar esta validación.",
+        ", ".join(missing_environment),
     )
+    sys.exit(1)
 
 from app.main import app
 from app.core.security import (
-    SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES,
+    SECRET_KEY, ALGORITHM,
     hash_password, verify_password, create_access_token,
 )
 from app.services.db_service import (
@@ -324,7 +328,7 @@ async def run_all_validations():
           sec.SECRET_KEY == os.environ["SECRET_KEY"])
     check("ALGORITHM = HS256", sec.ALGORITHM == "HS256")
     check("ACCESS_TOKEN_EXPIRE_MINUTES = 60",
-          sec.ACCESS_TOKEN_EXPIRE_MINUTES == 60)
+          sec._get_access_token_expire_minutes() == 60)
 
     # ════════════════════════════════════════════════════════════
     #  10. Estructura de rutas /auth, /users, /profiles
@@ -358,30 +362,31 @@ async def run_all_validations():
     print("\n📋 7+11. Rutas protegidas (401 sin token + 5 suppliers)")
 
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        # 7. Sin token → 401
-        # Rutas conocidas protegidas
-        protected_routes = [
-            ("GET", "/auth/me"),
-            ("GET", "/users/"),
-            ("GET", "/profiles/me"),
-            ("GET", "/suppliers"),
-            ("GET", "/suppliers/1"),
-        ]
-        for method, route in protected_routes:
-            resp = await client.request(method, route)
-            check(f"401 {method} {route} (sin token)",
-                  resp.status_code == 401,
-                  f"Status: {resp.status_code}, Body: {resp.text[:100]}")
+    try:
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            # 7. Sin token → 401
+            # Rutas conocidas protegidas
+            protected_routes = [
+                ("GET", "/auth/me"),
+                ("GET", "/users/"),
+                ("GET", "/profiles/me"),
+                ("GET", "/suppliers"),
+                ("GET", "/suppliers/1"),
+            ]
+            for method, route in protected_routes:
+                resp = await client.request(method, route)
+                check(f"401 {method} {route} (sin token)",
+                      resp.status_code == 401,
+                      f"Status: {resp.status_code}, Body: {resp.text[:100]}")
 
-        # 11. 5 rutas suppliers protegidas
-        supplier_routes_no_auth = [
-            ("GET", "/suppliers"),
-            ("GET", "/suppliers/1"),
-            ("PATCH", "/suppliers/1/rate"),
-            ("PATCH", "/suppliers/1/status"),
-            ("DELETE", "/suppliers/1"),
-        ]
+            # 11. 5 rutas suppliers protegidas
+            supplier_routes_no_auth = [
+                ("GET", "/suppliers"),
+                ("GET", "/suppliers/1"),
+                ("PATCH", "/suppliers/1/rate"),
+                ("PATCH", "/suppliers/1/status"),
+                ("DELETE", "/suppliers/1"),
+            ]
         protected_suppliers = 0
         for method, route in supplier_routes_no_auth:
             resp = await client.request(method, route)
@@ -524,6 +529,10 @@ async def run_all_validations():
                 check(f"401 {method} {route}", False, f"Status: {resp.status_code}")
         if all_401:
             check("Todas las rutas protegidas → 401 sin token", True)
+
+    except Exception:
+        logger.exception("Error durante la validación de rutas HTTP")
+        check("Validación HTTP sin excepción", False, "Se lanzó una excepción inesperada")
 
     # ════════════════════════════════════════════════════════════
     #  Resumen final

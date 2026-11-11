@@ -34,9 +34,11 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       body?.detail ??
       (typeof body === "object" ? JSON.stringify(body) : body) ??
       res.statusText;
-    throw new Error(
-      typeof detail === "string" ? detail : JSON.stringify(detail),
-    );
+    // Sanitizar: los mensajes internos nunca llegan al usuario
+    const sanitized = typeof detail === "string"
+      ? detail
+      : JSON.stringify(detail);
+    throw new Error(sanitized || "Error al comunicarse con el servidor");
   }
 
   return body as T;

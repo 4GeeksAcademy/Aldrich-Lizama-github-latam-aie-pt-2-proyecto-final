@@ -41,7 +41,12 @@ from services.api.seed import seed_suppliers
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     """Carga los datos semilla al arrancar la aplicación."""
-    seed_suppliers()
+    import logging
+    _logger = logging.getLogger("nexova.api")
+    try:
+        seed_suppliers()
+    except Exception:
+        _logger.exception("Error al sembrar datos iniciales (seed_suppliers)")
     yield
 
 

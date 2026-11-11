@@ -217,6 +217,9 @@ export default function ChangePasswordPage() {
             role="alert"
           >
             <p style={{ margin: 0, color: "crimson" }}>{error}</p>
+            <button className="btn btn-link" onClick={() => setError(null)} style={{ marginTop: "0.3rem", padding: 0, border: "none", background: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer" }}>
+              Reintentar
+            </button>
           </div>
         ) : null}
 

@@ -93,9 +93,12 @@ export default function ForgotPasswordPage() {
         </div>
 
         {error ? (
-          <p style={{ color: "crimson", margin: 0 }} role="alert">
-            {error}
-          </p>
+          <div style={{ color: "crimson", margin: 0 }} role="alert">
+            <p style={{ margin: 0 }}>{error}</p>
+            <button className="btn btn-link" onClick={() => setError(null)} style={{ marginTop: "0.3rem", padding: 0, border: "none", background: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer" }}>
+              Reintentar
+            </button>
+          </div>
         ) : null}
 
         <button

@@ -919,7 +919,7 @@ export default function IncidentManagerPage() {
                           )
                         }
                       >
-                        {NEXT_STATUSES[incident.status].map((value) => (
+                        {(NEXT_STATUSES[incident.status] ?? []).map((value) => (
                           <option key={value} value={value}>
                             {STATUS_LABELS[value]}
                           </option>

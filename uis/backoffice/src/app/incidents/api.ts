@@ -26,9 +26,8 @@ export async function uploadAndAnalyze(file: File): Promise<AnalysisResult> {
   });
 
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
     throw new Error(
-      `Error ${res.status} al analizar el archivo: ${body || res.statusText}`,
+      `Error al analizar el archivo (código ${res.status}). Verifica que el formato sea correcto e inténtalo de nuevo.`,
     );
   }
 

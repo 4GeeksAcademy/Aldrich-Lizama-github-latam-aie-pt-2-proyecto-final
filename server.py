@@ -3,23 +3,45 @@ try:
     from flask import Flask
     from flask import send_from_directory
 except ImportError:
-    print("You don't have Flask installed, run `$ pip3 install flask` and try again")
-    exit(1)
+    import logging
+    logging.getLogger("nexova.server").error(
+        "Flask no está instalado. Ejecuta 'pip3 install flask' y prueba de nuevo."
+    )
+    import sys
+    sys.exit(1)
 
-import os, subprocess
+import logging
+import os
+import subprocess
+
+logger = logging.getLogger("nexova.server")
 
 static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), './')
 app = Flask(__name__)
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 #disable cache
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # disable cache
 
 # Serving the index file
 @app.route('/', methods=['GET'])
 def serve_dir_directory_index():
     if os.path.exists("app.py"):
-        # if app.py exists we use the render function
-        out = subprocess.Popen(['python3','app.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        stdout,stderr = out.communicate()
-        return stdout if out.returncode == 0 else f"<pre style='color: red;'>{stdout.decode('utf-8')}</pre>"
+        try:
+            out = subprocess.Popen(
+                ['python3', 'app.py'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            stdout, _ = out.communicate(timeout=30)
+            if out.returncode == 0:
+                return stdout
+            else:
+                logger.warning("app.py falló con código %s", out.returncode)
+                return f"<pre style='color: red;'>{stdout.decode('utf-8')}</pre>"
+        except subprocess.TimeoutExpired:
+            logger.error("app.py excedió el tiempo de espera (30s)")
+            return "<pre style='color: red;'>El proceso app.py excedió el tiempo de espera.</pre>"
+        except Exception:
+            logger.exception("Error al ejecutar app.py")
+            return "<pre style='color: red;'>Error interno al ejecutar app.py</pre>"
     if os.path.exists("index.html"):
         return send_from_directory(static_file_dir, 'index.html')
     else:
@@ -34,4 +56,6 @@ def serve_any_other_file(path):
     response.cache_control.max_age = 0 # avoid cache memory
     return response
 
-app.run(host='0.0.0.0',port=3001, debug=True, extra_files=['./',])
+if __name__ == "__main__":
+    debug_mode = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host='0.0.0.0', port=3001, debug=debug_mode, extra_files=['./',])

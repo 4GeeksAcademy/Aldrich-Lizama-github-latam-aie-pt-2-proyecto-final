@@ -17,8 +17,11 @@ Flags adicionales:
 
 import argparse
 import csv
-import sys
+import logging
 import os
+import sys
+
+logger = logging.getLogger("nexova.scripts.analyze")
 
 # ── Asegurar que el paquete reutilizable es importable ────
 #    (tanto si se ejecuta desde la raíz del repo como desde scripts/)
@@ -83,7 +86,8 @@ def main() -> None:
         analyzer = NexovaAnalyzer()
         stats = analyzer.analyze_file(args.csv_file)
     except (FileNotFoundError, csv.Error) as exc:
-        print(f"\n{exc}", file=sys.stderr)
+        logger.exception("Error al analizar el archivo CSV '%s'", args.csv_file)
+        print(f"\nError: {exc}", file=sys.stderr)
         sys.exit(1)
 
     # ── Salida ────────────────────────────────────────────
@@ -103,6 +107,10 @@ def main() -> None:
         return
 
     if args.no_interactive:
+        return
+
+    if not sys.stdin.isatty():
+        print("\n  (export skipped — non-interactive terminal)")
         return
 
     try:

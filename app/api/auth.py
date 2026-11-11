@@ -17,10 +17,12 @@ Uso:
 """
 
 import hashlib
+import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -41,6 +43,7 @@ from app.services.db_service import (
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+logger = logging.getLogger("nexova.auth")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -190,14 +193,20 @@ async def forgot_password(
                 email_to=user["email"],
                 reset_url=reset_url,
             )
-        except Exception as exc:  # noqa: BLE001 - el email es best-effort
-            # En modo desarrollo (sin EMAIL_SERVICE_API_KEY) o si el
-            # proveedor falla, no rompemos el flujo: el token ya quedó
-            # registrado en la BD y puede usarse igualmente.
-            import logging
-
-            logging.getLogger("nexova.auth").warning(
-                "No se pudo enviar el correo de reset: %s", exc
+        except httpx.HTTPStatusError as exc:
+            logger.warning(
+                "Error HTTP al enviar email de reset (user_id=%s): %s",
+                user["id"], exc,
+            )
+        except httpx.RequestError as exc:
+            logger.warning(
+                "Error de conexión al enviar email de reset (user_id=%s): %s",
+                user["id"], exc,
+            )
+        except RuntimeError as exc:
+            logger.warning(
+                "Error de configuración del servicio email (user_id=%s): %s",
+                user["id"], exc,
             )
 
     return {
@@ -263,6 +272,11 @@ async def reset_password(
     update_user_password(user_id=record["user_id"], new_hashed_password=hashed)
     mark_token_as_used(token_hash)
 
+    logger.info(
+        "Password reset exitoso para user_id=%s (token consumido)",
+        record["user_id"],
+    )
+
     return {
         "message": "Contraseña actualizada correctamente.",
     }
@@ -309,6 +323,11 @@ async def change_password(
     update_user_password(
         user_id=current_user["id"],
         new_hashed_password=hashed,
+    )
+
+    logger.info(
+        "Password change exitoso para user_id=%s",
+        current_user["id"],
     )
 
     return {

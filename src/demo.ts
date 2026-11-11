@@ -141,7 +141,12 @@ function section(title: string): void {
 
 function printJson(label: string, data: unknown): void {
   console.log(`\n📌 ${label}:`);
-  console.log(JSON.stringify(data, null, 2));
+  try {
+    console.log(JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error("Error al serializar datos para depuración:", err);
+    console.log(data);
+  }
 }
 
 // ─── Tests ────────────────────────────────────────────────

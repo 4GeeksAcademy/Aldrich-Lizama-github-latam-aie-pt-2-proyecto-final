@@ -19,12 +19,14 @@ Endpoints:
   PUT    /applications/card    → Crear o actualizar la ficha
 """
 
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from app.api.deps import get_current_user
+from app.services.db_service import _get_db
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
@@ -73,12 +75,9 @@ async def list_applications(
 ) -> list[dict[str, Any]]:
     """Retorna todas las postulaciones del usuario autenticado."""
     user_id = current_user["id"]
-    from app.services.db_service import _get_db
-
     db = _get_db()
     table = db.table("applications")
-    Application = type("Query", (), {})()
-    # Simulamos query por user_id con TinyDB
+    # Simulamos query por user_id con TinyDB (tabla completa en memoria)
     results = []
     for doc in table.all():
         if doc.get("user_id") == user_id:
@@ -97,9 +96,6 @@ async def create_application(
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Registra una nueva postulación para el usuario autenticado."""
-    from datetime import datetime, timezone
-    from app.services.db_service import _get_db
-
     db = _get_db()
     table = db.table("applications")
     doc_id = table.insert({
@@ -130,8 +126,6 @@ async def get_my_card(
     Si no existe, retorna un objeto vacío (el frontend puede
     detectar ausencia de ``id``).
     """
-    from app.services.db_service import _get_db
-
     db = _get_db()
     table = db.table("application_cards")
     for doc in table.all():
@@ -142,7 +136,10 @@ async def get_my_card(
 
 # ══════════════════════════════════════════════════════════════
 #  PUT /applications/card — Crear o actualizar ficha
-#  (Debe estar ANTES de /{app_id} para evitar conflicto de ruta)
+# ══════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
+#  PUT /applications/card — Crear o actualizar ficha
+#  (Debe ir ANTES de /{app_id} para evitar conflicto de ruta)
 # ══════════════════════════════════════════════════════════════
 
 
@@ -151,35 +148,31 @@ async def upsert_my_card(
     payload: ApplicationCardCreate,
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
-    """Crea o actualiza la ficha de auto-llenado del usuario autenticado.
-
-    - Si ya existe una ficha para el usuario, la actualiza.
-    - Si no existe, la crea.
-    """
-    from app.services.db_service import _get_db
-
+    """Crea o actualiza la ficha de auto-llenado del usuario."""
     db = _get_db()
     table = db.table("application_cards")
     user_id = current_user["id"]
 
-    # Buscar ficha existente
+    # Buscar si ya existe
     existing_id = None
     for doc in table.all():
         if doc.get("user_id") == user_id:
             existing_id = doc.doc_id
             break
 
-    update_data = payload.model_dump(exclude_none=True)
+    data = payload.model_dump(exclude_none=True)
+    data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     if existing_id is not None:
-        table.update(update_data, doc_ids=[existing_id])
-        updated = table.get(doc_id=existing_id)
-        return {**updated, "id": existing_id}
+        table.update(data, doc_ids=[existing_id])
+        doc = table.get(doc_id=existing_id)
+        return {**doc, "id": existing_id}
     else:
-        update_data["user_id"] = user_id
-        doc_id = table.insert(update_data)
-        doc = table.get(doc_id=doc_id)
-        return {**doc, "id": doc_id}
+        data["user_id"] = user_id
+        data["created_at"] = datetime.now(timezone.utc).isoformat()
+        new_id = table.insert(data)
+        doc = table.get(doc_id=new_id)
+        return {**doc, "id": new_id}
 
 
 # ══════════════════════════════════════════════════════════════
@@ -194,8 +187,6 @@ async def update_application(
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Actualiza los campos de una postulación (solo del usuario autenticado)."""
-    from app.services.db_service import _get_db
-
     db = _get_db()
     table = db.table("applications")
     doc = table.get(doc_id=app_id)
@@ -224,8 +215,6 @@ async def delete_application(
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, str]:
     """Elimina una postulación (solo del usuario autenticado)."""
-    from app.services.db_service import _get_db
-
     db = _get_db()
     table = db.table("applications")
     doc = table.get(doc_id=app_id)
@@ -237,41 +226,3 @@ async def delete_application(
 
     table.remove(doc_ids=[app_id])
     return {"message": "Postulación eliminada correctamente."}
-#  PUT /applications/card — Crear o actualizar ficha
-# ══════════════════════════════════════════════════════════════
-
-
-@router.put("/card")
-async def upsert_my_card(
-    payload: ApplicationCardCreate,
-    current_user: dict[str, Any] = Depends(get_current_user),
-) -> dict[str, Any]:
-    """Crea o actualiza la ficha de auto-llenado del usuario."""
-    from datetime import datetime, timezone
-    from app.services.db_service import _get_db
-
-    db = _get_db()
-    table = db.table("application_cards")
-    user_id = current_user["id"]
-
-    # Buscar si ya existe
-    existing_id = None
-    for doc in table.all():
-        if doc.get("user_id") == user_id:
-            existing_id = doc.doc_id
-            break
-
-    data = payload.model_dump(exclude_none=True)
-    data["user_id"] = user_id
-    data["updated_at"] = datetime.now(timezone.utc).isoformat()
-
-    if existing_id is not None:
-        data.pop("user_id", None)
-        table.update(data, doc_ids=[existing_id])
-        doc = table.get(doc_id=existing_id)
-        return {**doc, "id": existing_id}
-    else:
-        data["created_at"] = datetime.now(timezone.utc).isoformat()
-        new_id = table.insert(data)
-        doc = table.get(doc_id=new_id)
-        return {**doc, "id": new_id}

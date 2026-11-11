@@ -105,9 +105,12 @@ export default function LoginPage() {
         </label>
 
         {error && (
-          <p role="alert" style={{ color: "#b42318", margin: 0 }}>
-            {error}
-          </p>
+          <div role="alert" style={{ color: "#b42318", margin: 0 }}>
+            <p style={{ margin: 0 }}>{error}</p>
+            <button className="btn btn-link" onClick={() => setError(null)} style={{ marginTop: "0.3rem", padding: 0, border: "none", background: "none", color: "var(--primary)", textDecoration: "underline", cursor: "pointer" }}>
+              Reintentar
+            </button>
+          </div>
         )}
 
         <button type="submit" disabled={isSubmitting}>

@@ -13,6 +13,7 @@ Uso:
     from app.core.security import hash_password, verify_password, create_access_token
 """
 
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -22,29 +23,44 @@ from dotenv import load_dotenv
 from jose import jwt
 from passlib.hash import bcrypt
 
+logger = logging.getLogger("nexova.core.security")
+
 # ── Cargar variables de entorno ─────────────────────────
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise RuntimeError(
-        "SECRET_KEY es obligatoria. Defínela en el archivo .env antes de iniciar la API."
-    )
-
+SECRET_KEY: str | None = os.getenv("SECRET_KEY")
 ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
-_access_token_expire_minutes = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-if not _access_token_expire_minutes:
-    raise RuntimeError(
-        "ACCESS_TOKEN_EXPIRE_MINUTES es obligatoria. Defínela en el archivo .env antes de iniciar la API."
-    )
 
-try:
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(_access_token_expire_minutes)
-except ValueError as exc:
-    raise RuntimeError("ACCESS_TOKEN_EXPIRE_MINUTES debe ser un entero positivo.") from exc
+# Variable inicializada de forma perezosa en _get_config()
+_ACCESS_TOKEN_EXPIRE_MINUTES: int | None = None
 
-if ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
-    raise RuntimeError("ACCESS_TOKEN_EXPIRE_MINUTES debe ser un entero positivo.")
+
+def _get_access_token_expire_minutes() -> int:
+    """Valida y retorna ACCESS_TOKEN_EXPIRE_MINUTES.
+
+    Separada en una función para que el error de configuración
+    ocurra en el primer uso (no al importar el módulo), permitiendo
+    que el manejador global de excepciones esté instalado.
+    """
+    global _ACCESS_TOKEN_EXPIRE_MINUTES
+    if _ACCESS_TOKEN_EXPIRE_MINUTES is not None:
+        return _ACCESS_TOKEN_EXPIRE_MINUTES
+
+    raw = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+    if not raw:
+        logger.error(
+            "ACCESS_TOKEN_EXPIRE_MINUTES es obligatoria. "
+            "Defínela en el archivo .env antes de iniciar la API."
+        )
+        raise RuntimeError("ACCESS_TOKEN_EXPIRE_MINUTES no está configurada.")
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise RuntimeError("ACCESS_TOKEN_EXPIRE_MINUTES debe ser un entero positivo.") from exc
+    if value <= 0:
+        raise RuntimeError("ACCESS_TOKEN_EXPIRE_MINUTES debe ser un entero positivo.")
+    _ACCESS_TOKEN_EXPIRE_MINUTES = value
+    return value
 
 
 # ══════════════════════════════════════════════════════════
@@ -95,7 +111,14 @@ def create_access_token(
 
     Returns:
         Token JWT codificado como string.
+
+    Raises:
+        RuntimeError: Si SECRET_KEY no está configurada.
     """
+    if not SECRET_KEY:
+        logger.error("SECRET_KEY no está configurada.")
+        raise RuntimeError("SECRET_KEY no está configurada.")
+
     to_encode = data.copy()
 
     # ── Determinar expiración ──────────────────────────
@@ -103,16 +126,20 @@ def create_access_token(
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+            minutes=_get_access_token_expire_minutes()
         )
 
     to_encode.update({"exp": expire})
 
     # ── Firmar y codificar ─────────────────────────────
-    encoded_jwt = jwt.encode(
-        claims=to_encode,
-        key=SECRET_KEY,
-        algorithm=ALGORITHM,
-    )
+    try:
+        encoded_jwt = jwt.encode(
+            claims=to_encode,
+            key=SECRET_KEY,
+            algorithm=ALGORITHM,
+        )
+    except Exception:
+        logger.exception("Error al firmar el token JWT")
+        raise RuntimeError("Error al generar el token de acceso.")
 
     return encoded_jwt

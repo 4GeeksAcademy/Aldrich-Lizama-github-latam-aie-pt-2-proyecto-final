@@ -180,7 +180,21 @@ def main() -> None:
         help=f"CSV histórico a cargar (por defecto: {DEFAULT_CSV_PATH})",
     )
     args = parser.parse_args()
-    seed_incidents(args.csv_path)
+
+    if not args.csv_path.exists():
+        print(f"Error: el archivo '{args.csv_path}' no existe.", file=sys.stderr)
+        sys.exit(1)
+    if not args.csv_path.is_file():
+        print(f"Error: '{args.csv_path}' no es un archivo válido.", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        seed_incidents(args.csv_path)
+    except (FileNotFoundError, PermissionError) as exc:
+        logger = logging.getLogger("nexova.api")
+        logger.exception("No se pudo cargar el archivo CSV: %s", exc)
+        print(f"Error al leer '{args.csv_path}': {exc}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

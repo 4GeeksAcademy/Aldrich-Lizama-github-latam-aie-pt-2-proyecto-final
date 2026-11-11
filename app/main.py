@@ -39,6 +39,9 @@ from app.api.applications import router as applications_router
 from services.api.routes.suppliers import router as suppliers_router
 from services.api.seed import seed_suppliers
 
+# ── Global exception handler ───────────────────────────
+from services.api.errors import unhandled_exception_handler
+
 
 # ══════════════════════════════════════════════════════════
 #  Lifespan handler (startup seed)
@@ -48,7 +51,12 @@ from services.api.seed import seed_suppliers
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     """Carga los datos semilla al arrancar la aplicación."""
-    seed_suppliers()
+    import logging
+    _logger = logging.getLogger("nexova.api")
+    try:
+        seed_suppliers()
+    except Exception:
+        _logger.exception("Error al sembrar datos iniciales (seed_suppliers)")
     yield
 
 
@@ -65,6 +73,9 @@ app = FastAPI(
     version="1.3.0",
     lifespan=lifespan,
 )
+
+# ── Global exception handler: evita fugas de stack trace ──
+app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # ── CORS: permitir que el frontend (Next.js backoffice) se comunique ──
 app.add_middleware(
