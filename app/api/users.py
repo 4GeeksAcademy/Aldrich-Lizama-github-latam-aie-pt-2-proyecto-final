@@ -33,6 +33,7 @@ from app.services.db_service import (
 )
 
 router = APIRouter(prefix="/users", tags=["users"])
+logger = logging.getLogger("nexova.users")
 
 
 # ══════════════════════════════════════════════════════════════

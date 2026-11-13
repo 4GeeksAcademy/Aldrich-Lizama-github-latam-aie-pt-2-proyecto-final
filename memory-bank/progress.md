@@ -30,7 +30,21 @@
 - Deuda pendiente: **los diseños de login, registro y perfil no se han unificado entre las aplicaciones**. Siguiente paso: acordar componentes y estilo compartidos y consolidar la batería E2E en una suite persistente.
 - Riesgos restantes: warning preexistente de múltiples lockfiles en el build del tracker y warning de `<img>` en website. `dist/` es salida generada y queda fuera del commit.
 
-## Corrección AUTH-02 — 2026-09-24
+## Building-Bullet-Proof-Applications — 2026-09-28
+
+- Rama activa: `Building-Bullet-Proof-Applications`.
+- **Objetivo cumplido**: 9 suites de prueba implementadas con umbrales de cobertura superados.
+- **AUTH-088 (auth endpoints)** ✅: 46 tests pytest sobre `app/api/auth.py` — cobertura **100%** (umbral 70%).
+- **API-042 (applications)** ✅: 5 tests sobre `app/api/applications.py` — cobertura **100%** (umbral 60%).
+- **API-042 (suppliers)** ✅: 4 tests sobre `services/api/routes/suppliers.py` — cobertura **99%** (umbral 60%).
+- **FE-019 (TypeScript client)** ✅: 6 tests Jest sobre `src/app/suppliers/api.ts` — cobertura **75.86%**.
+- **Bug corregido**: `app/api/users.py` — `NameError` por `logger` no definido en cláusula `except`.
+- **Dependencias añadidas a `pyproject.toml`**: `httpx>=0.27.0`, `email-validator>=2.1.0`, `python-multipart>=0.0.18`.
+- **Config pytest**: `[tool.pytest.ini_options]` con `testpaths = ["tests"]` y `pythonpath = ["."]`.
+- **Config Jest**: `uis/backoffice/jest.config.js` con `next/jest`, módulo `node`, alias `@/`.
+- **Documentación**: `TESTING.md` creado con matriz plan vs ejecución, resultados y bug documentado.
+- **Archivos protegidos no modificados**: `package.json` raíz, CONTEXT/*, `app/main.py`, `services/server.py`.
+- **Próximo paso**: Merge de rama `Building-Bullet-Proof-Applications` a `main` y sincronización con los cambios de las demás ramas activas.
 
 - Rama: `Autenticación_yRestricción`.
 - `SECRET_KEY` y `ACCESS_TOKEN_EXPIRE_MINUTES` ahora son obligatorias desde el entorno, sin valores fallback inseguros.
